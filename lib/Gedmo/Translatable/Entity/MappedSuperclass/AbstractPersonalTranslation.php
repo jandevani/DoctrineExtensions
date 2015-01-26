@@ -41,7 +41,7 @@ abstract class AbstractPersonalTranslation
     protected $object;
 
     /**
-     * @var text $content
+     * @var string $content
      *
      * @ORM\Column(type="text", nullable=true)
      */
@@ -61,18 +61,20 @@ abstract class AbstractPersonalTranslation
      * Set locale
      *
      * @param string $locale
-     * @return AbstractTranslation
+     *
+     * @return static
      */
     public function setLocale($locale)
     {
         $this->locale = $locale;
+
         return $this;
     }
 
     /**
      * Get locale
      *
-     * @return string $locale
+     * @return string
      */
     public function getLocale()
     {
@@ -83,11 +85,13 @@ abstract class AbstractPersonalTranslation
      * Set field
      *
      * @param string $field
-     * @return AbstractTranslation
+     *
+     * @return static
      */
     public function setField($field)
     {
         $this->field = $field;
+
         return $this;
     }
 
@@ -105,18 +109,20 @@ abstract class AbstractPersonalTranslation
      * Set object related
      *
      * @param string $object
-     * @return AbstractTranslation
+     *
+     * @return static
      */
     public function setObject($object)
     {
         $this->object = $object;
+
         return $this;
     }
 
     /**
      * Get related object
      *
-     * @return object $object
+     * @return object
      */
     public function getObject()
     {
@@ -127,18 +133,20 @@ abstract class AbstractPersonalTranslation
      * Set content
      *
      * @param string $content
-     * @return AbstractTranslation
+     *
+     * @return static
      */
     public function setContent($content)
     {
         $this->content = $content;
+
         return $this;
     }
 
     /**
      * Get content
      *
-     * @return string $content
+     * @return string
      */
     public function getContent()
     {

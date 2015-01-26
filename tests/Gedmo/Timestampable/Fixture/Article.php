@@ -19,6 +19,11 @@ class Article implements Timestampable
     private $title;
 
     /**
+     * @ORM\Column(name="body", type="string")
+     */
+    private $body;
+
+    /**
      * @ORM\OneToMany(targetEntity="Timestampable\Fixture\Comment", mappedBy="article")
      */
     private $comments;
@@ -48,6 +53,14 @@ class Article implements Timestampable
     private $published;
 
     /**
+     * @var datetime $contentChanged
+     *
+     * @ORM\Column(name="content_changed", type="datetime", nullable=true)
+     * @Gedmo\Timestampable(on="change", field={"title", "body"})
+     */
+    private $contentChanged;
+
+    /**
      * @ORM\ManyToOne(targetEntity="Type", inversedBy="articles")
      */
     private $type;
@@ -70,6 +83,16 @@ class Article implements Timestampable
     public function getTitle()
     {
         return $this->title;
+    }
+
+    public function setBody($body)
+    {
+        $this->body = $body;
+    }
+
+    public function getBody()
+    {
+        return $this->body;
     }
 
     public function addComment(Comment $comment)
@@ -121,5 +144,15 @@ class Article implements Timestampable
     public function setUpdated(\DateTime $updated)
     {
         $this->updated = $updated;
+    }
+
+    public function setContentChanged(\DateTime $contentChanged)
+    {
+        $this->contentChanged = $contentChanged;
+    }
+
+    public function getContentChanged()
+    {
+        return $this->contentChanged;
     }
 }

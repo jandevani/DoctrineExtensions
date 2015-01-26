@@ -2,20 +2,17 @@
 
 namespace Gedmo\Timestampable\Mapping\Driver;
 
-use Gedmo\Mapping\Driver\File,
-    Gedmo\Mapping\Driver,
-    Gedmo\Exception\InvalidMappingException;
+use Gedmo\Mapping\Driver\File;
+use Gedmo\Mapping\Driver;
+use Gedmo\Exception\InvalidMappingException;
 
 /**
  * This is a yaml mapping driver for Timestampable
  * behavioral extension. Used for extraction of extended
- * metadata from yaml specificaly for Timestampable
+ * metadata from yaml specifically for Timestampable
  * extension.
  *
  * @author Gediminas Morkevicius <gediminas.morkevicius@gmail.com>
- * @package Gedmo.Timestampable.Mapping.Driver
- * @subpackage Yaml
- * @link http://www.gediminasm.org
  * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
 class Yaml extends File implements Driver
@@ -35,9 +32,11 @@ class Yaml extends File implements Driver
         'date',
         'time',
         'datetime',
+        'datetimetz',
         'timestamp',
         'zenddate',
-        'vardatetime'
+        'vardatetime',
+        'integer',
     );
 
     /**
@@ -62,10 +61,15 @@ class Yaml extends File implements Driver
                         if (!isset($mappingProperty['field'])) {
                             throw new InvalidMappingException("Missing parameters on property - {$field}, field must be set on [change] trigger in class - {$meta->name}");
                         }
+                        $trackedFieldAttribute = $mappingProperty['field'];
+                        $valueAttribute = isset($mappingProperty['value']) ? $mappingProperty['value'] : null;
+                        if (is_array($trackedFieldAttribute) && null !== $valueAttribute) {
+                            throw new InvalidMappingException("Timestampable extension does not support multiple value changeset detection yet.");
+                        }
                         $field = array(
                             'field' => $field,
-                            'trackedField' => $mappingProperty['field'],
-                            'value' => isset($mappingProperty['value']) ? $mappingProperty['value'] : null,
+                            'trackedField' => $trackedFieldAttribute,
+                            'value' => $valueAttribute,
                         );
                     }
                     $config[$mappingProperty['on']][] = $field;
@@ -87,11 +91,13 @@ class Yaml extends File implements Driver
      *
      * @param object $meta
      * @param string $field
+     *
      * @return boolean
      */
     protected function isValidField($meta, $field)
     {
         $mapping = $meta->getFieldMapping($field);
+
         return $mapping && in_array($mapping['type'], $this->validTypes);
     }
 }

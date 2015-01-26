@@ -4,14 +4,12 @@ namespace Gedmo\Translatable;
 
 use Doctrine\Common\EventManager;
 use Tool\BaseTestCaseORM;
-use Doctrine\Common\Util\Debug,
-    Translatable\Fixture\StringIdentifier;
+use Translatable\Fixture\StringIdentifier;
 
 /**
  * These are tests for translatable behavior
  *
  * @author Gediminas Morkevicius <gediminas.morkevicius@gmail.com>
- * @package Gedmo.Translatable
  * @link http://www.gediminasm.org
  * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
@@ -27,7 +25,7 @@ class TranslatableIdentifierTest extends BaseTestCaseORM
     {
         parent::setUp();
 
-        $evm = new EventManager;
+        $evm = new EventManager();
         $this->translatableListener = new TranslatableListener();
         $this->translatableListener->setTranslatableLocale('en_us');
         $this->translatableListener->setDefaultLocale('en_us');
@@ -38,7 +36,7 @@ class TranslatableIdentifierTest extends BaseTestCaseORM
                     'host' => '127.0.0.1',
                     'dbname' => 'test',
                     'user' => 'root',
-                    'password' => 'nimda'
+                    'password' => 'nimda',
         );
         //$this->getMockCustomEntityManager($conn, $evm);
         $this->getMockSqliteEntityManager($evm);
@@ -47,11 +45,11 @@ class TranslatableIdentifierTest extends BaseTestCaseORM
     /**
      * @test
      */
-    function shouldHandleStringIdentifier()
+    public function shouldHandleStringIdentifier()
     {
         $object = new StringIdentifier();
         $object->setTitle('title in en');
-        $object->setUid(md5(self::FIXTURE . time()));
+        $object->setUid(md5(self::FIXTURE.time()));
 
         $this->em->persist($object);
         $this->em->flush();
@@ -92,7 +90,7 @@ class TranslatableIdentifierTest extends BaseTestCaseORM
 
         // dql test object hydration
         $q = $this->em
-            ->createQuery('SELECT si FROM ' . self::FIXTURE . ' si WHERE si.uid = :id')
+            ->createQuery('SELECT si FROM '.self::FIXTURE.' si WHERE si.uid = :id')
             ->setParameter('id', $this->testObjectId)
             ->useResultCache(false)
         ;
@@ -113,7 +111,7 @@ class TranslatableIdentifierTest extends BaseTestCaseORM
     {
         return array(
             self::FIXTURE,
-            self::TRANSLATION
+            self::TRANSLATION,
         );
     }
 }

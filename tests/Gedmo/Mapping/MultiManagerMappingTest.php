@@ -6,14 +6,12 @@ use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\ORM\Mapping\Driver\DriverChain;
 use Doctrine\ORM\Mapping\Driver\YamlDriver;
 use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
-use Gedmo\Mapping\ExtensionMetadataFactory;
 use Tool\BaseTestCaseOM;
 
 /**
  * These are mapping extension tests
  *
  * @author Gediminas Morkevicius <gediminas.morkevicius@gmail.com>
- * @package Gedmo.Mapping
  * @link http://www.gediminasm.org
  * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
@@ -39,7 +37,7 @@ class MultiManagerMappingTest extends BaseTestCaseOM
         parent::setUp();
         // EM with standard annotation mapping
         $this->em1 = $this->getMockSqliteEntityManager(array(
-            'Sluggable\Fixture\Article'
+            'Sluggable\Fixture\Article',
         ));
         // EM with yaml and annotation mapping
         $reader = new AnnotationReader();
@@ -50,7 +48,7 @@ class MultiManagerMappingTest extends BaseTestCaseOM
 
         $yamlDriver = new YamlDriver(__DIR__.'/Driver/Yaml');
 
-        $chain = new DriverChain;
+        $chain = new DriverChain();
         $chain->addDriver($annotationDriver, 'Translatable\Fixture');
         $chain->addDriver($yamlDriver, 'Mapping\Fixture\Yaml');
         $chain->addDriver($annotationDriver2, 'Gedmo\Translatable');
@@ -66,14 +64,14 @@ class MultiManagerMappingTest extends BaseTestCaseOM
     public function testTwoDiferentManager()
     {
         $meta = $this->dm1->getClassMetadata('Sluggable\Fixture\Document\Article');
-        $dmArticle = new \Sluggable\Fixture\Document\Article;
+        $dmArticle = new \Sluggable\Fixture\Document\Article();
         $dmArticle->setCode('code');
         $dmArticle->setTitle('title');
         $this->dm1->persist($dmArticle);
         $this->dm1->flush();
 
         $this->assertEquals('title-code', $dmArticle->getSlug());
-        $em1Article = new \Sluggable\Fixture\Article;
+        $em1Article = new \Sluggable\Fixture\Article();
         $em1Article->setCode('code');
         $em1Article->setTitle('title');
         $this->em1->persist($em1Article);
@@ -84,7 +82,7 @@ class MultiManagerMappingTest extends BaseTestCaseOM
 
     public function testTwoSameManagers()
     {
-        $em1Article = new \Sluggable\Fixture\Article;
+        $em1Article = new \Sluggable\Fixture\Article();
         $em1Article->setCode('code');
         $em1Article->setTitle('title');
         $this->em1->persist($em1Article);
@@ -92,7 +90,7 @@ class MultiManagerMappingTest extends BaseTestCaseOM
 
         $this->assertEquals('title-code', $em1Article->getSlug());
 
-        $user = new \Mapping\Fixture\Yaml\User;
+        $user = new \Mapping\Fixture\Yaml\User();
         $user->setUsername('user');
         $user->setPassword('secret');
         $this->em2->persist($user);

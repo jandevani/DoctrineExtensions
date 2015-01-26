@@ -2,17 +2,15 @@
 
 namespace Gedmo\Sluggable;
 
-use Doctrine\Common\Util\Debug,
-    Doctrine\ORM\Mapping\Driver\YamlDriver,
-    Doctrine\ORM\Mapping\Driver\DriverChain,
-    Mapping\Fixture\Yaml\Category,
-    Gedmo\Mapping\ExtensionMetadataFactory;
+use Doctrine\ORM\Mapping\Driver\YamlDriver;
+use Doctrine\ORM\Mapping\Driver\DriverChain;
+use Mapping\Fixture\Yaml\Category;
+use Gedmo\Mapping\ExtensionMetadataFactory;
 
 /**
  * These are mapping tests for sluggable extension
  *
  * @author Gediminas Morkevicius <gediminas.morkevicius@gmail.com>
- * @package Gedmo.Mapping
  * @link http://www.gediminasm.org
  * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
@@ -25,19 +23,19 @@ class SluggableMappingTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $config = new \Doctrine\ORM\Configuration();
-        $config->setMetadataCacheImpl(new \Doctrine\Common\Cache\ArrayCache);
-        $config->setQueryCacheImpl(new \Doctrine\Common\Cache\ArrayCache);
+        $config->setMetadataCacheImpl(new \Doctrine\Common\Cache\ArrayCache());
+        $config->setQueryCacheImpl(new \Doctrine\Common\Cache\ArrayCache());
         $config->setProxyDir(TESTS_TEMP_DIR);
         $config->setProxyNamespace('Gedmo\Mapping\Proxy');
-        $chainDriverImpl = new DriverChain;
+        $chainDriverImpl = new DriverChain();
         $chainDriverImpl->addDriver(
-            new YamlDriver(array(__DIR__ . '/Driver/Yaml')),
+            new YamlDriver(array(__DIR__.'/Driver/Yaml')),
             'Mapping\Fixture\Yaml'
         );
         $reader = new \Doctrine\Common\Annotations\AnnotationReader();
         \Doctrine\Common\Annotations\AnnotationRegistry::registerAutoloadNamespace(
             'Gedmo\\Mapping\\Annotation',
-            VENDOR_PATH . '/../lib'
+            VENDOR_PATH.'/../lib'
         );
         $chainDriverImpl->addDriver(
             new \Doctrine\ORM\Mapping\Driver\AnnotationDriver($reader),
@@ -55,7 +53,10 @@ class SluggableMappingTest extends \PHPUnit_Framework_TestCase
         $this->em = \Doctrine\ORM\EntityManager::create($conn, $config, $evm);
     }
 
-    public function testYamlMapping()
+    /**
+     * @test
+     */
+    public function shouldBeAbleToMapSluggableUsingYamlDriver()
     {
         $meta = $this->em->getClassMetadata(self::TEST_YAML_ENTITY_CLASS);
         $cacheId = ExtensionMetadataFactory::getCacheId(
@@ -63,6 +64,7 @@ class SluggableMappingTest extends \PHPUnit_Framework_TestCase
             'Gedmo\Sluggable'
         );
         $config = $this->em->getMetadataFactory()->getCacheDriver()->fetch($cacheId);
+
         $this->assertArrayHasKey('slugs', $config);
         $this->assertArrayHasKey('slug', $config['slugs']);
         $this->assertEquals('slug', $config['slugs']['slug']['slug']);
@@ -78,5 +80,62 @@ class SluggableMappingTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($config['slugs']['slug']['unique']);
         $this->assertArrayHasKey('updatable', $config['slugs']['slug']);
         $this->assertTrue($config['slugs']['slug']['updatable']);
+
+        $this->assertArrayHasKey('handlers', $config['slugs']['slug']);
+        $handlers = $config['slugs']['slug']['handlers'];
+        $this->assertEquals(2, count($handlers));
+        $this->assertArrayHasKey('Gedmo\Sluggable\Handler\TreeSlugHandler', $handlers);
+        $this->assertArrayHasKey('Gedmo\Sluggable\Handler\RelativeSlugHandler', $handlers);
+
+        $first = $handlers['Gedmo\Sluggable\Handler\TreeSlugHandler'];
+        $this->assertEquals(2, count($first));
+        $this->assertArrayHasKey('parentRelationField', $first);
+        $this->assertArrayHasKey('separator', $first);
+        $this->assertEquals('parent', $first['parentRelationField']);
+        $this->assertEquals('/', $first['separator']);
+
+        $second = $handlers['Gedmo\Sluggable\Handler\RelativeSlugHandler'];
+        $this->assertEquals(3, count($second));
+        $this->assertArrayHasKey('relationField', $second);
+        $this->assertArrayHasKey('relationSlugField', $second);
+        $this->assertArrayHasKey('separator', $second);
+        $this->assertEquals('parent', $second['relationField']);
+        $this->assertEquals('slug', $second['relationSlugField']);
+        $this->assertEquals('/', $second['separator']);
+    }
+
+    /**
+     * @test
+     */
+    public function shouldBeAbleToMapSluggableUsingAnnotationDriver()
+    {
+        $meta = $this->em->getClassMetadata(self::SLUGGABLE);
+        $cacheId = ExtensionMetadataFactory::getCacheId(
+            self::SLUGGABLE,
+            'Gedmo\Sluggable'
+        );
+        $config = $this->em->getMetadataFactory()->getCacheDriver()->fetch($cacheId);
+
+        $this->assertArrayHasKey('handlers', $config['slugs']['slug']);
+        $handlers = $config['slugs']['slug']['handlers'];
+        $this->assertEquals(2, count($handlers));
+        $this->assertArrayHasKey('Gedmo\Sluggable\Handler\TreeSlugHandler', $handlers);
+        $this->assertArrayHasKey('Gedmo\Sluggable\Handler\RelativeSlugHandler', $handlers);
+
+        $first = $handlers['Gedmo\Sluggable\Handler\TreeSlugHandler'];
+        $this->assertEquals(2, count($first));
+        $this->assertArrayHasKey('parentRelationField', $first);
+        $this->assertArrayHasKey('separator', $first);
+        $this->assertEquals('parent', $first['parentRelationField']);
+        $this->assertEquals('/', $first['separator']);
+
+        $second = $handlers['Gedmo\Sluggable\Handler\RelativeSlugHandler'];
+        $this->assertEquals(3, count($second));
+        $this->assertArrayHasKey('relationField', $second);
+        $this->assertArrayHasKey('relationSlugField', $second);
+        $this->assertArrayHasKey('separator', $second);
+        $this->assertEquals('user', $second['relationField']);
+        $this->assertEquals('slug', $second['relationSlugField']);
+        $this->assertEquals('/', $second['separator']);
     }
 }

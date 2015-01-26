@@ -5,7 +5,6 @@
  *
  * @author Gustavo Adrian <comfortablynumb84@gmail.com>
  * @author Gediminas Morkevicius <gediminas.morkevicius@gmail.com>
- * @package Gedmo.Tree.Mock
  * @link http://www.gediminasm.org
  * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
@@ -36,7 +35,7 @@ class TreeListenerMock extends TreeListener
             $this->strategy = new MaterializedPathMock($this);
             $this->strategy->releaseLock = $this->releaseLocks;
         }
-        
+
         return array('materializedPath' => $this->strategy);
     }
 

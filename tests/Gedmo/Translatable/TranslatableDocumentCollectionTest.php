@@ -10,7 +10,6 @@ use Translatable\Fixture\Document\SimpleArticle as Article;
  * These are tests for translatable behavior
  *
  * @author Gediminas Morkevicius <gediminas.morkevicius@gmail.com>
- * @package Gedmo.Translatable
  * @link http://www.gediminasm.org
  * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
@@ -26,7 +25,7 @@ class TranslatableDocumentCollectionTest extends BaseTestCaseMongoODM
     {
         parent::setUp();
 
-        $evm = new EventManager;
+        $evm = new EventManager();
         $this->translatableListener = new TranslatableListener();
         $this->translatableListener->setDefaultLocale('en_us');
         $this->translatableListener->setTranslatableLocale('en_us');
@@ -39,7 +38,7 @@ class TranslatableDocumentCollectionTest extends BaseTestCaseMongoODM
     /**
      * @test
      */
-    function shouldPersistMultipleTranslations()
+    public function shouldPersistMultipleTranslations()
     {
         $repo = $this->dm->getRepository(self::TRANSLATION);
         $sport = $this->dm->getRepository(self::ARTICLE)->find($this->id);
@@ -61,7 +60,7 @@ class TranslatableDocumentCollectionTest extends BaseTestCaseMongoODM
     /**
      * @test
      */
-    function shouldUpdateTranslation()
+    public function shouldUpdateTranslation()
     {
         $repo = $this->dm->getRepository(self::TRANSLATION);
         $sport = $this->dm->getRepository(self::ARTICLE)->find($this->id);
@@ -84,7 +83,7 @@ class TranslatableDocumentCollectionTest extends BaseTestCaseMongoODM
     /**
      * @test
      */
-    function shouldUpdateMultipleTranslations()
+    public function shouldUpdateMultipleTranslations()
     {
         $repo = $this->dm->getRepository(self::TRANSLATION);
         $sport = $this->dm->getRepository(self::ARTICLE)->find($this->id);
@@ -127,7 +126,7 @@ class TranslatableDocumentCollectionTest extends BaseTestCaseMongoODM
     private function populate()
     {
         $repo = $this->dm->getRepository(self::TRANSLATION);
-        $sport = new Article;
+        $sport = new Article();
         $sport->setTitle('Sport');
         $sport->setContent('about sport');
 

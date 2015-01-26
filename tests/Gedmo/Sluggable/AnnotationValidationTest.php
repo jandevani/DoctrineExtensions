@@ -10,7 +10,6 @@ use Sluggable\Fixture\Validate;
  * These are tests for Sluggable behavior
  *
  * @author Gediminas Morkevicius <gediminas.morkevicius@gmail.com>
- * @package Gedmo.Sluggable
  * @link http://www.gediminasm.org
  * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
@@ -22,16 +21,16 @@ class AnnotationValidationTest extends BaseTestCaseORM
      * @test
      * @expectedException Gedmo\Exception\InvalidMappingException
      */
-    function shouldFailValidationOnInvalidAnnotation()
+    public function shouldFailValidationOnInvalidAnnotation()
     {
-        $evm = new EventManager;
-        $evm->addEventSubscriber(new SluggableListener);
+        $evm = new EventManager();
+        $evm->addEventSubscriber(new SluggableListener());
         $this->getMockSqliteEntityManager($evm);
 
-        $slug = new Validate;
+        $slug = new Validate();
         $slug->setTitle('My Slug');
 
-        $slug2 = new Validate;
+        $slug2 = new Validate();
         $slug2->setTitle('My Slug');
 
         $this->em->persist($slug);
@@ -44,7 +43,7 @@ class AnnotationValidationTest extends BaseTestCaseORM
     protected function getUsedEntityFixtures()
     {
         return array(
-            self::TARGET
+            self::TARGET,
         );
     }
 }

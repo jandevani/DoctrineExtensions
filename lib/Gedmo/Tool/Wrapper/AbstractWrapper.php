@@ -6,16 +6,13 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ODM\MongoDB\DocumentManager;
 use Doctrine\Common\Persistence\ObjectManager;
 use Gedmo\Tool\WrapperInterface;
-use Gedmo\Exception\UnsupportedObjectManager;
+use Gedmo\Exception\UnsupportedObjectManagerException;
 
 /**
  * Wraps entity or proxy for more convenient
  * manipulation
  *
  * @author Gediminas Morkevicius <gediminas.morkevicius@gmail.com>
- * @package Gedmo.Tool.Wrapper
- * @subpackage EntityWrapper
- * @link http://www.gediminasm.org
  * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
 abstract class AbstractWrapper implements WrapperInterface
@@ -49,25 +46,28 @@ abstract class AbstractWrapper implements WrapperInterface
     private static $wrappedObjectReferences;
 
     /**
-     * Wrapp object factory method
+     * Wrap object factory method
      *
-     * @param object $object
-     * @param \Doctrine\Common\Persistence\ObjectManager $om
+     * @param object        $object
+     * @param ObjectManager $om
+     *
+     * @throws \Gedmo\Exception\UnsupportedObjectManagerException
+     *
      * @return \Gedmo\Tool\WrapperInterface
      */
     public static function wrap($object, ObjectManager $om)
     {
-        $oid = spl_object_hash($object);
-        if (!isset(self::$wrappedObjectReferences[$oid])) {
-            if ($om instanceof EntityManager) {
-                self::$wrappedObjectReferences[$oid] = new EntityWrapper($object, $om);
-            } elseif ($om instanceof DocumentManager) {
-                self::$wrappedObjectReferences[$oid] = new MongoDocumentWrapper($object, $om);
-            } else {
-                throw new UnsupportedObjectManager('Given object manager is not managed by wrapper');
-            }
+        if ($om instanceof EntityManager) {
+            return new EntityWrapper($object, $om);
+        } elseif ($om instanceof DocumentManager) {
+            return new MongoDocumentWrapper($object, $om);
         }
-        return self::$wrappedObjectReferences[$oid];
+        throw new UnsupportedObjectManagerException('Given object manager is not managed by wrapper');
+    }
+
+    public static function clear()
+    {
+        self::$wrappedObjectReferences = array();
     }
 
     /**
@@ -94,6 +94,7 @@ abstract class AbstractWrapper implements WrapperInterface
         foreach ($data as $field => $value) {
             $this->setPropertyValue($field, $value);
         }
+
         return $this;
     }
 }

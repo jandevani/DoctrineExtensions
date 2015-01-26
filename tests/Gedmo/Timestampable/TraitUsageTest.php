@@ -10,7 +10,6 @@ use Timestampable\Fixture\UsingTrait;
  * These are tests for Timestampable behavior
  *
  * @author Gediminas Morkevicius <gediminas.morkevicius@gmail.com>
- * @package Gedmo.Timestampable
  * @link http://www.gediminasm.org
  * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
@@ -26,8 +25,8 @@ class TraitUsageTest extends BaseTestCaseORM
             $this->markTestSkipped('PHP >= 5.4 version required for this test.');
         }
 
-        $evm = new EventManager;
-        $evm->addEventSubscriber(new TimestampableListener);
+        $evm = new EventManager();
+        $evm->addEventSubscriber(new TimestampableListener());
 
         $this->getMockSqliteEntityManager($evm);
     }
@@ -35,9 +34,9 @@ class TraitUsageTest extends BaseTestCaseORM
     /**
      * @test
      */
-    function shouldTimestampUsingTrait()
+    public function shouldTimestampUsingTrait()
     {
-        $sport = new UsingTrait;
+        $sport = new UsingTrait();
         $sport->setTitle('Sport');
 
         $this->em->persist($sport);
@@ -47,10 +46,20 @@ class TraitUsageTest extends BaseTestCaseORM
         $this->assertNotNull($sport->getUpdatedAt());
     }
 
+    /**
+     * @test
+     */
+    public function traitMethodthShouldReturnObject()
+    {
+        $sport = new UsingTrait();
+        $this->assertInstanceOf('Timestampable\Fixture\UsingTrait', $sport->setCreatedAt(new \DateTime()));
+        $this->assertInstanceOf('Timestampable\Fixture\UsingTrait', $sport->setUpdatedAt(new \DateTime()));
+    }
+
     protected function getUsedEntityFixtures()
     {
         return array(
-            self::TARGET
+            self::TARGET,
         );
     }
 }

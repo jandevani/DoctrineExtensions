@@ -2,22 +2,18 @@
 
 namespace Gedmo\Uploadable\Mapping\Driver;
 
-use Gedmo\Mapping\Driver\Xml as BaseXml,
-    Gedmo\Exception\InvalidMappingException,
-    Gedmo\Uploadable\Mapping\Validator;
+use Gedmo\Mapping\Driver\Xml as BaseXml;
+use Gedmo\Uploadable\Mapping\Validator;
 
 /**
  * This is a xml mapping driver for Uploadable
  * behavioral extension. Used for extraction of extended
- * metadata from xml specificaly for Uploadable
+ * metadata from xml specifically for Uploadable
  * extension.
  *
  * @author Gustavo Falco <comfortablynumb84@gmail.com>
  * @author Gediminas Morkevicius <gediminas.morkevicius@gmail.com>
  * @author Miha Vrhovnik <miha.vrhovnik@gmail.com>
- * @package Gedmo.Uploadable.Mapping.Driver
- * @subpackage Xml
- * @link http://www.gediminasm.org
  * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
 class Xml extends BaseXml
@@ -49,6 +45,7 @@ class Xml extends BaseXml
                 $config['callback'] = $this->_isAttributeSet($xmlUploadable, 'callback') ?
                     $this->_getAttribute($xml->{'uploadable'}, 'callback') : '';
                 $config['fileMimeTypeField'] = false;
+                $config['fileNameField'] = false;
                 $config['filePathField'] = false;
                 $config['fileSizeField'] = false;
                 $config['filenameGenerator'] = $this->_isAttributeSet($xmlUploadable, 'filename-generator') ?
@@ -73,9 +70,11 @@ class Xml extends BaseXml
 
                         if (isset($mapping->{'uploadable-file-mime-type'})) {
                             $config['fileMimeTypeField'] = $field;
-                        } else if (isset($mapping->{'uploadable-file-size'})) {
+                        } elseif (isset($mapping->{'uploadable-file-size'})) {
                             $config['fileSizeField'] = $field;
-                        } else if (isset($mapping->{'uploadable-file-path'})) {
+                        } elseif (isset($mapping->{'uploadable-file-name'})) {
+                            $config['fileNameField'] = $field;
+                        } elseif (isset($mapping->{'uploadable-file-path'})) {
                             $config['filePathField'] = $field;
                         }
                     }

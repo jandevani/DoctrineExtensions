@@ -8,7 +8,6 @@ use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 * These are mapping tests for tree extension
 *
 * @author Gediminas Morkevicius <gediminas.morkevicius@gmail.com>
-* @package Gedmo.Mapping
 * @link http://www.gediminasm.org
 * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
 */
@@ -19,7 +18,7 @@ class CustomDriverTest extends \PHPUnit_Framework_TestCase
         $config = new \Doctrine\ORM\Configuration();
         $config->setProxyDir(TESTS_TEMP_DIR);
         $config->setProxyNamespace('Gedmo\Mapping\Proxy');
-        $config->setMetadataDriverImpl(new CustomDriver);
+        $config->setMetadataDriverImpl(new CustomDriver());
 
         $conn = array(
             'driver' => 'pdo_sqlite',
@@ -51,7 +50,7 @@ class CustomDriverTest extends \PHPUnit_Framework_TestCase
         );
         $this->assertTrue(isset($conf['create']));
 
-        $test = new Timestampable;
+        $test = new Timestampable();
         $this->em->persist($test);
         $this->em->flush();
 

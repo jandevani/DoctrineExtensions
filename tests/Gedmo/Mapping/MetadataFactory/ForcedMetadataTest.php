@@ -8,7 +8,6 @@ use Doctrine\ORM\Version;
 * These are mapping tests for tree extension
 *
 * @author Gediminas Morkevicius <gediminas.morkevicius@gmail.com>
-* @package Gedmo.Mapping
 * @link http://www.gediminasm.org
 * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
 */
@@ -90,7 +89,7 @@ class ForcedMetadataTest extends \PHPUnit_Framework_TestCase
         );
         $this->assertTrue(isset($conf['create']));
 
-        $test = new Timestampable;
+        $test = new Timestampable();
         $this->em->persist($test);
         $this->em->flush();
 

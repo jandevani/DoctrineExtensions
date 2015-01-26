@@ -2,21 +2,18 @@
 
 namespace Gedmo\Tree\Mapping\Driver;
 
-use Gedmo\Mapping\Driver\File,
-    Gedmo\Mapping\Driver,
-    Gedmo\Exception\InvalidMappingException,
-    Gedmo\Tree\Mapping\Validator;
+use Gedmo\Mapping\Driver\File;
+use Gedmo\Mapping\Driver;
+use Gedmo\Exception\InvalidMappingException;
+use Gedmo\Tree\Mapping\Validator;
 
 /**
  * This is a yaml mapping driver for Tree
  * behavioral extension. Used for extraction of extended
- * metadata from yaml specificaly for Tree
+ * metadata from yaml specifically for Tree
  * extension.
  *
  * @author Gediminas Morkevicius <gediminas.morkevicius@gmail.com>
- * @package Gedmo.Tree.Mapping.Driver
- * @subpackage Yaml
- * @link http://www.gediminasm.org
  * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
 class Yaml extends File implements Driver
@@ -35,7 +32,7 @@ class Yaml extends File implements Driver
     private $strategies = array(
         'nested',
         'closure',
-        'materializedPath'
+        'materializedPath',
     );
 
     /**
@@ -111,18 +108,47 @@ class Yaml extends File implements Driver
                         if (strlen($separator) > 1) {
                             throw new InvalidMappingException("Tree Path field - [{$field}] Separator {$separator} is invalid. It must be only one character long.");
                         }
+
+                        if (is_array($treePathInfo) && isset($treePathInfo['appendId'])) {
+                            $appendId = $treePathInfo['appendId'];
+                        } else {
+                            $appendId = null;
+                        }
+
+                        if (is_array($treePathInfo) && isset($treePathInfo['startsWithSeparator'])) {
+                            $startsWithSeparator = $treePathInfo['startsWithSeparator'];
+                        } else {
+                            $startsWithSeparator = false;
+                        }
+
+                        if (is_array($treePathInfo) && isset($treePathInfo['endsWithSeparator'])) {
+                            $endsWithSeparator = $treePathInfo['endsWithSeparator'];
+                        } else {
+                            $endsWithSeparator = true;
+                        }
+
                         $config['path'] = $field;
                         $config['path_separator'] = $separator;
+                        $config['path_append_id'] = $appendId;
+                        $config['path_starts_with_separator'] = $startsWithSeparator;
+                        $config['path_ends_with_separator'] = $endsWithSeparator;
                     } elseif (in_array('treePathSource', $fieldMapping['gedmo'])) {
                         if (!$validator->isValidFieldForPathSource($meta, $field)) {
                             throw new InvalidMappingException("Tree PathSource field - [{$field}] type is not valid. It can be any of the integer variants, double, float or string in class - {$meta->name}");
                         }
                         $config['path_source'] = $field;
+                    } elseif (in_array('treePathHash', $fieldMapping['gedmo'])) {
+                        if (!$validator->isValidFieldForPathSource($meta, $field)) {
+                            throw new InvalidMappingException("Tree PathHash field - [{$field}] type is not valid and must be 'string' in class - {$meta->name}");
+                        }
+                        $config['path_hash'] = $field;
                     } elseif (in_array('treeLockTime', $fieldMapping['gedmo'])) {
                         if (!$validator->isValidFieldForLocktime($meta, $field)) {
                             throw new InvalidMappingException("Tree LockTime field - [{$field}] type is not valid. It must be \"date\" in class - {$meta->name}");
                         }
                         $config['lock_time'] = $field;
+                    } elseif (in_array('treeParent', $fieldMapping['gedmo'])) {
+                        $config['parent'] = $field;
                     }
                 }
             }
@@ -136,7 +162,9 @@ class Yaml extends File implements Driver
             foreach ($mapping['manyToOne'] as $field => $relationMapping) {
                 if (isset($relationMapping['gedmo'])) {
                     if (in_array('treeParent', $relationMapping['gedmo'])) {
-                        if ($relationMapping['targetEntity'] != $meta->name) {
+                        $reflectionClass = new \ReflectionClass($meta->name);
+                        if ($relationMapping['targetEntity'] != $meta->name &&
+                            !$reflectionClass->implementsInterface($relationMapping['targetEntity'])) {
                             throw new InvalidMappingException("Unable to find ancestor/parent child relation through ancestor field - [{$field}] in class - {$meta->name}");
                         }
                         $config['parent'] = $field;
@@ -150,7 +178,7 @@ class Yaml extends File implements Driver
                 if (is_array($meta->identifier) && count($meta->identifier) > 1) {
                     throw new InvalidMappingException("Tree does not support composite identifiers in class - {$meta->name}");
                 }
-                $method = 'validate' . ucfirst($config['strategy']) . 'TreeMetadata';
+                $method = 'validate'.ucfirst($config['strategy']).'TreeMetadata';
                 $validator->$method($meta, $config);
             } else {
                 throw new InvalidMappingException("Cannot find Tree type for class: {$meta->name}");

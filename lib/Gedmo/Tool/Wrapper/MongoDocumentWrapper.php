@@ -10,9 +10,6 @@ use Doctrine\ODM\MongoDB\Proxy\Proxy;
  * manipulation
  *
  * @author Gediminas Morkevicius <gediminas.morkevicius@gmail.com>
- * @package Gedmo.Tool.Wrapper
- * @subpackage MongoDocumentWrapper
- * @link http://www.gediminasm.org
  * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
 class MongoDocumentWrapper extends AbstractWrapper
@@ -32,9 +29,9 @@ class MongoDocumentWrapper extends AbstractWrapper
     private $initialized = false;
 
     /**
-     * Wrapp document
+     * Wrap document
      *
-     * @param object $document
+     * @param object                                $document
      * @param \Doctrine\ODM\MongoDB\DocumentManager $dm
      */
     public function __construct($document, DocumentManager $dm)
@@ -50,6 +47,7 @@ class MongoDocumentWrapper extends AbstractWrapper
     public function getPropertyValue($property)
     {
         $this->initialize();
+
         return $this->meta->getReflectionProperty($property)->getValue($this->object);
     }
 
@@ -68,6 +66,7 @@ class MongoDocumentWrapper extends AbstractWrapper
     {
         $this->initialize();
         $this->meta->getReflectionProperty($property)->setValue($this->object, $value);
+
         return $this;
     }
 
@@ -76,7 +75,7 @@ class MongoDocumentWrapper extends AbstractWrapper
      */
     public function hasValidIdentifier()
     {
-        return (bool)$this->getIdentifier();
+        return (bool) $this->getIdentifier();
     }
 
     /**
@@ -88,15 +87,16 @@ class MongoDocumentWrapper extends AbstractWrapper
             if ($this->object instanceof Proxy) {
                 $uow = $this->om->getUnitOfWork();
                 if ($uow->isInIdentityMap($this->object)) {
-                    $this->identifier = (string)$uow->getDocumentIdentifier($this->object);
+                    $this->identifier = (string) $uow->getDocumentIdentifier($this->object);
                 } else {
                     $this->initialize();
                 }
             }
             if (!$this->identifier) {
-                $this->identifier = (string)$this->getPropertyValue($this->meta->identifier);
+                $this->identifier = (string) $this->getPropertyValue($this->meta->identifier);
             }
         }
+
         return $this->identifier;
     }
 

@@ -13,7 +13,6 @@ use Translatable\Fixture\Comment;
  * These are tests for translation query walker
  *
  * @author Gediminas Morkevicius <gediminas.morkevicius@gmail.com>
- * @package Gedmo.Translatable
  * @link http://www.gediminasm.org
  * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
@@ -31,7 +30,7 @@ class Issue135Test extends BaseTestCaseORM
     {
         parent::setUp();
 
-        $evm = new EventManager;
+        $evm = new EventManager();
         $this->translatableListener = new TranslatableListener();
         $this->translatableListener->setTranslatableLocale('en_us');
         $this->translatableListener->setDefaultLocale('en_us');
@@ -65,7 +64,7 @@ class Issue135Test extends BaseTestCaseORM
         return array(
             self::ARTICLE,
             self::TRANSLATION,
-            self::COMMENT
+            self::COMMENT,
         );
     }
 
@@ -73,22 +72,22 @@ class Issue135Test extends BaseTestCaseORM
     {
         $this->translatableListener->setTranslatableLocale('en');
         $this->translatableListener->setDefaultLocale('en');
-        $text0 = new Article;
+        $text0 = new Article();
         $text0->setTitle('text0');
 
         $this->em->persist($text0);
 
-        $text1 = new Article;
+        $text1 = new Article();
         $text1->setTitle('text1');
 
         $this->em->persist($text1);
 
-        $na = new Article;
+        $na = new Article();
         $na->setTitle('NA');
 
         $this->em->persist($na);
 
-        $out = new Article;
+        $out = new Article();
         $out->setTitle('Out');
 
         $this->em->persist($out);

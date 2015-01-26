@@ -9,9 +9,6 @@ use Gedmo\Mapping\Event\AdapterInterface;
  * for Timestampable behavior
  *
  * @author Gediminas Morkevicius <gediminas.morkevicius@gmail.com>
- * @package Gedmo\Timestampable\Mapping\Event
- * @subpackage TimestampableAdapter
- * @link http://www.gediminasm.org
  * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
 interface TimestampableAdapter extends AdapterInterface
@@ -21,7 +18,8 @@ interface TimestampableAdapter extends AdapterInterface
      *
      * @param object $meta
      * @param string $field
+     *
      * @return mixed
      */
-    function getDateValue($meta, $field);
+    public function getDateValue($meta, $field);
 }

@@ -2,19 +2,16 @@
 
 namespace Gedmo\Sortable\Mapping\Driver;
 
-use Gedmo\Mapping\Driver\AbstractAnnotationDriver,
-    Gedmo\Exception\InvalidMappingException;
+use Gedmo\Mapping\Driver\AbstractAnnotationDriver;
+use Gedmo\Exception\InvalidMappingException;
 
 /**
  * This is an annotation mapping driver for Sortable
  * behavioral extension. Used for extraction of extended
- * metadata from Annotations specificaly for Sortable
+ * metadata from Annotations specifically for Sortable
  * extension.
  *
  * @author Lukas Botsch <lukas.botsch@gmail.com>
- * @package Gedmo.Sortable.Mapping.Driver
- * @subpackage Annotation
- * @link http://www.gediminasm.org
  * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
 class Annotation extends AbstractAnnotationDriver
@@ -35,9 +32,10 @@ class Annotation extends AbstractAnnotationDriver
      * @var array
      */
     protected $validTypes = array(
+        'int',
         'integer',
         'smallint',
-        'bigint'
+        'bigint',
     );
 
     /**
@@ -55,8 +53,9 @@ class Annotation extends AbstractAnnotationDriver
             ) {
                 continue;
             }
+
             // position
-            if ($position = $this->reader->getPropertyAnnotation($property, self::POSITION)) {
+            if ($this->reader->getPropertyAnnotation($property, self::POSITION)) {
                 $field = $property->getName();
                 if (!$meta->hasField($field)) {
                     throw new InvalidMappingException("Unable to find 'position' - [{$field}] as mapped property in entity - {$meta->name}");
@@ -66,8 +65,9 @@ class Annotation extends AbstractAnnotationDriver
                 }
                 $config['position'] = $field;
             }
+
             // group
-            if ($group = $this->reader->getPropertyAnnotation($property, self::GROUP)) {
+            if ($this->reader->getPropertyAnnotation($property, self::GROUP)) {
                 $field = $property->getName();
                 if (!$meta->hasField($field) && !$meta->hasAssociation($field)) {
                     throw new InvalidMappingException("Unable to find 'group' - [{$field}] as mapped property in entity - {$meta->name}");

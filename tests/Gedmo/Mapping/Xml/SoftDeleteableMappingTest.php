@@ -15,7 +15,6 @@ use Tool\BaseTestCaseOM;
  *
  * @author Gustavo Falco <comfortablynumb84@gmail.com>
  * @author Gediminas Morkevicius <gediminas.morkevicius@gmail.com>
- * @package Gedmo.Mapping
  * @link http://www.gediminasm.org
  * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
@@ -34,23 +33,23 @@ class SoftDeleteableMappingTest extends BaseTestCaseOM
     public function setUp()
     {
         parent::setUp();
-        
+
         $reader = new AnnotationReader();
         $annotationDriver = new AnnotationDriver($reader);
 
         $xmlDriver = new XmlDriver(__DIR__.'/../Driver/Xml');
 
-        $chain = new DriverChain;
+        $chain = new DriverChain();
         $chain->addDriver($xmlDriver, 'Mapping\Fixture\Xml');
         $chain->addDriver($annotationDriver, 'Mapping\Fixture');
 
-        $this->softDeleteable = new SoftDeleteableListener;
-        $this->evm = new EventManager;
+        $this->softDeleteable = new SoftDeleteableListener();
+        $this->evm = new EventManager();
         $this->evm->addEventSubscriber($this->softDeleteable);
 
         $this->em = $this->getMockSqliteEntityManager(array(
             'Mapping\Fixture\Xml\SoftDeleteable',
-            'Mapping\Fixture\SoftDeleteable'
+            'Mapping\Fixture\SoftDeleteable',
         ), $chain);
     }
 
@@ -61,6 +60,8 @@ class SoftDeleteableMappingTest extends BaseTestCaseOM
 
         $this->assertArrayHasKey('softDeleteable', $config);
         $this->assertTrue($config['softDeleteable']);
+        $this->assertArrayHasKey('timeAware', $config);
+        $this->assertFalse($config['timeAware']);
         $this->assertArrayHasKey('fieldName', $config);
         $this->assertEquals('deletedAt', $config['fieldName']);
     }

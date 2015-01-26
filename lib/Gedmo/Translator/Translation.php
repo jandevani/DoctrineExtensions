@@ -6,7 +6,6 @@ namespace Gedmo\Translator;
  * Base translation class.
  *
  * @author  Konstantin Kudryashov <ever.zet@gmail.com>
- * @link    http://www.gediminasm.org
  * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
 abstract class Translation implements TranslationInterface
@@ -29,7 +28,7 @@ abstract class Translation implements TranslationInterface
     /**
      * Get translatable
      *
-     * @return string $translatable
+     * @return string
      */
     public function getTranslatable()
     {
@@ -49,7 +48,7 @@ abstract class Translation implements TranslationInterface
     /**
      * Get locale
      *
-     * @return string $locale
+     * @return string
      */
     public function getLocale()
     {
@@ -59,7 +58,7 @@ abstract class Translation implements TranslationInterface
     /**
      * Set property
      *
-     * @param string $field
+     * @param string $property
      */
     public function setProperty($property)
     {
@@ -69,7 +68,7 @@ abstract class Translation implements TranslationInterface
     /**
      * Get property
      *
-     * @return string $field
+     * @return string
      */
     public function getProperty()
     {
@@ -79,19 +78,21 @@ abstract class Translation implements TranslationInterface
     /**
      * Set value
      *
-     * @param text $value
-     * @return AbstractTranslation
+     * @param string $value
+     *
+     * @return static
      */
     public function setValue($value)
     {
         $this->value = $value;
+
         return $this;
     }
 
     /**
      * Get value
      *
-     * @return text $value
+     * @return string
      */
     public function getValue()
     {

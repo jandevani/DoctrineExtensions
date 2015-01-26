@@ -2,26 +2,23 @@
 
 namespace Gedmo\Uploadable\Mapping;
 
-use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Gedmo\Exception\InvalidMappingException;
 use Gedmo\Exception\UploadableCantWriteException;
 use Gedmo\Exception\UploadableInvalidPathException;
-use Doctrine\ORM\Mapping\ClassMetadata;
+use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 
 /**
  * This class is used to validate mapping information
  *
  * @author Gustavo Falco <comfortablynumb84@gmail.com>
  * @author Gediminas Morkevicius <gediminas.morkevicius@gmail.com>
- * @package Gedmo.Uploadable.Mapping
- * @subpackage Validator
- * @link http://www.gediminasm.org
  * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
 
-class Validator 
+class Validator
 {
     const UPLOADABLE_FILE_MIME_TYPE = 'UploadableFileMimeType';
+    const UPLOADABLE_FILE_NAME = 'UploadableFileName';
     const UPLOADABLE_FILE_PATH = 'UploadableFilePath';
     const UPLOADABLE_FILE_SIZE = 'UploadableFileSize';
     const FILENAME_GENERATOR_SHA1 = 'SHA1';
@@ -42,7 +39,16 @@ class Validator
      * @var array
      */
     public static $validFileMimeTypeTypes = array(
-        'string'
+        'string',
+    );
+
+    /**
+     * List of types which are valid for UploadableFileName field
+     *
+     * @var array
+     */
+    public static $validFileNameTypes = array(
+        'string',
     );
 
     /**
@@ -51,36 +57,65 @@ class Validator
      * @var array
      */
     public static $validFilePathTypes = array(
-        'string'
+        'string',
     );
 
     /**
-     * List of types which are valid for UploadableFileSize field
+     * List of types which are valid for UploadableFileSize field for ORM
      *
      * @var array
      */
     public static $validFileSizeTypes = array(
-        'decimal'
+        'decimal',
     );
 
+    /**
+     * List of types which are valid for UploadableFileSize field for ODM
+     *
+     * @var array
+     */
+    public static $validFileSizeTypesODM = array(
+        'float',
+    );
 
-    public static function validateFileMimeTypeField(ClassMetadataInfo $meta, $field)
+    /**
+     * Whether to validate if the directory of the file exists and is writable, useful to disable it when using
+     * stream wrappers which don't support is_dir (like Gaufrette)
+     *
+     * @var bool
+     */
+    public static $validateWritableDirectory = true;
+
+    public static function validateFileNameField(ClassMetadata $meta, $field)
+    {
+        self::validateField($meta, $field, self::UPLOADABLE_FILE_NAME, self::$validFileNameTypes);
+    }
+
+    public static function validateFileMimeTypeField(ClassMetadata $meta, $field)
     {
         self::validateField($meta, $field, self::UPLOADABLE_FILE_MIME_TYPE, self::$validFileMimeTypeTypes);
     }
 
-    public static function validateFilePathField(ClassMetadataInfo $meta, $field)
+    public static function validateFilePathField(ClassMetadata $meta, $field)
     {
         self::validateField($meta, $field, self::UPLOADABLE_FILE_PATH, self::$validFilePathTypes);
     }
 
-    public static function validateFileSizeField(ClassMetadataInfo $meta, $field)
+    public static function validateFileSizeField(ClassMetadata $meta, $field)
     {
-        self::validateField($meta, $field, self::UPLOADABLE_FILE_SIZE, self::$validFileSizeTypes);
+        if ($meta instanceof \Doctrine\ODM\MongoDB\Mapping\ClassMetadataInfo) {
+            self::validateField($meta, $field, self::UPLOADABLE_FILE_SIZE, self::$validFileSizeTypesODM);
+        } else {
+            self::validateField($meta, $field, self::UPLOADABLE_FILE_SIZE, self::$validFileSizeTypes);
+        }
     }
 
     public static function validateField($meta, $field, $uploadableField, $validFieldTypes)
     {
+        if ($meta->isMappedSuperclass) {
+            return;
+        }
+
         $fieldMapping = $meta->getFieldMapping($field);
 
         if (!in_array($fieldMapping['type'], $validFieldTypes)) {
@@ -100,8 +135,18 @@ class Validator
             throw new UploadableInvalidPathException('Path must be a string containing the path to a valid directory.');
         }
 
-        if (!is_dir($path) || !is_writable($path)) {
-            throw new UploadableCantWriteException(sprintf('Directory "%s" does not exist or is not writable',
+        if (!self::$validateWritableDirectory) {
+            return;
+        }
+
+        if (!is_dir($path) && !@mkdir($path, 0777, true)) {
+            throw new UploadableInvalidPathException(sprintf('Unable to create "%s" directory.',
+                $path
+            ));
+        }
+
+        if (!is_writable($path)) {
+            throw new UploadableCantWriteException(sprintf('Directory "%s" does is not writable.',
                 $path
             ));
         }
@@ -109,8 +154,8 @@ class Validator
 
     public static function validateConfiguration(ClassMetadata $meta, array &$config)
     {
-        if (!$config['filePathField']) {
-            throw new InvalidMappingException(sprintf('Class "%s" must have an UploadableFilePath field.',
+        if (!$config['filePathField'] && !$config['fileNameField']) {
+            throw new InvalidMappingException(sprintf('Class "%s" must have an UploadableFilePath or UploadableFileName field.',
                 $meta->name
             ));
         }
@@ -152,6 +197,14 @@ class Validator
         $config['disallowedTypes'] = $config['disallowedTypes'] ? (strpos($config['disallowedTypes'], ',') !== false ?
             explode(',', $config['disallowedTypes']) : array($config['disallowedTypes'])) : false;
 
+        if ($config['fileNameField']) {
+            self::validateFileNameField($meta, $config['fileNameField']);
+        }
+
+        if ($config['filePathField']) {
+            self::validateFilePathField($meta, $config['filePathField']);
+        }
+
         if ($config['fileMimeTypeField']) {
             self::validateFileMimeTypeField($meta, $config['fileMimeTypeField']);
         }
@@ -185,7 +238,5 @@ class Validator
                     ));
                 }
         }
-
-        self::validateFilePathField($meta, $config['filePathField']);
     }
 }

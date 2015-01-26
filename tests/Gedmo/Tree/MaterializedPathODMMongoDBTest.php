@@ -4,15 +4,12 @@ namespace Gedmo\Tree;
 
 use Doctrine\Common\EventManager;
 use Tool\BaseTestCaseMongoODM;
-use Doctrine\Common\Util\Debug;
-use Tree\Fixture\RootCategory;
 
 /**
  * These are tests for Tree behavior
  *
  * @author Gustavo Falco <comfortablynumb84@gmail.com>
  * @author Gediminas Morkevicius <gediminas.morkevicius@gmail.com>
- * @package Gedmo.Tree
  * @link http://www.gediminasm.org
  * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
@@ -27,9 +24,9 @@ class MaterializedPathODMMongoDBTest extends BaseTestCaseMongoODM
     {
         parent::setUp();
 
-        $this->listener = new TreeListener;
+        $this->listener = new TreeListener();
 
-        $evm = new EventManager;
+        $evm = new EventManager();
         $evm->addEventSubscriber($this->listener);
 
         $this->getMockDocumentManager($evm);
@@ -41,7 +38,7 @@ class MaterializedPathODMMongoDBTest extends BaseTestCaseMongoODM
     /**
      * @test
      */
-    function insertUpdateAndRemove()
+    public function insertUpdateAndRemove()
     {
         // Insert
         $category = $this->createCategory();
@@ -100,7 +97,7 @@ class MaterializedPathODMMongoDBTest extends BaseTestCaseMongoODM
         $this->dm->flush();
 
         $result = $this->dm->createQueryBuilder()->find(self::CATEGORY)->getQuery()->execute();
-        
+
         $firstResult = $result->getNext();
 
         $this->assertEquals(1, $result->count());
@@ -125,7 +122,8 @@ class MaterializedPathODMMongoDBTest extends BaseTestCaseMongoODM
     public function createCategory()
     {
         $class = self::CATEGORY;
-        return new $class;
+
+        return new $class();
     }
 
     public function generatePath(array $sources)

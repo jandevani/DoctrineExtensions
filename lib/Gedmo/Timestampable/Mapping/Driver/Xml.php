@@ -2,25 +2,21 @@
 
 namespace Gedmo\Timestampable\Mapping\Driver;
 
-use Gedmo\Mapping\Driver\Xml as BaseXml,
-    Gedmo\Exception\InvalidMappingException;
+use Gedmo\Mapping\Driver\Xml as BaseXml;
+use Gedmo\Exception\InvalidMappingException;
 
 /**
  * This is a xml mapping driver for Timestampable
  * behavioral extension. Used for extraction of extended
- * metadata from xml specificaly for Timestampable
+ * metadata from xml specifically for Timestampable
  * extension.
  *
  * @author Gediminas Morkevicius <gediminas.morkevicius@gmail.com>
  * @author Miha Vrhovnik <miha.vrhovnik@gmail.com>
- * @package Gedmo.Timestampable.Mapping.Driver
- * @subpackage Xml
- * @link http://www.gediminasm.org
  * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
 class Xml extends BaseXml
 {
-
     /**
      * List of types which are valid for timestamp
      *
@@ -30,9 +26,11 @@ class Xml extends BaseXml
         'date',
         'time',
         'datetime',
+        'datetimetz',
         'timestamp',
         'zenddate',
-        'vardatetime'
+        'vardatetime',
+        'integer',
     );
 
     /**
@@ -70,10 +68,15 @@ class Xml extends BaseXml
                         if (!$this->_isAttributeSet($data, 'field')) {
                             throw new InvalidMappingException("Missing parameters on property - {$field}, field must be set on [change] trigger in class - {$meta->name}");
                         }
+                        $trackedFieldAttribute = $this->_getAttribute($data, 'field');
+                        $valueAttribute = $this->_isAttributeSet($data, 'value') ? $this->_getAttribute($data, 'value' ) : null;
+                        if (is_array($trackedFieldAttribute) && null !== $valueAttribute) {
+                            throw new InvalidMappingException("Timestampable extension does not support multiple value changeset detection yet.");
+                        }
                         $field = array(
                             'field' => $field,
-                            'trackedField' => $this->_getAttribute($data, 'field'),
-                            'value' => $this->_isAttributeSet($data, 'value') ? $this->_getAttribute($data, 'value') : null,
+                            'trackedField' => $trackedFieldAttribute,
+                            'value' => $valueAttribute,
                         );
                     }
                     $config[$this->_getAttribute($data, 'on')][] = $field;
@@ -87,11 +90,13 @@ class Xml extends BaseXml
      *
      * @param object $meta
      * @param string $field
+     *
      * @return boolean
      */
     protected function isValidField($meta, $field)
     {
         $mapping = $meta->getFieldMapping($field);
+
         return $mapping && in_array($mapping['type'], $this->validTypes);
     }
 }

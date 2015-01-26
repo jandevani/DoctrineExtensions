@@ -14,7 +14,6 @@ use Tool\BaseTestCaseOM;
  * These are mapping extension tests
  *
  * @author Gediminas Morkevicius <gediminas.morkevicius@gmail.com>
- * @package Gedmo.Mapping
  * @link http://www.gediminasm.org
  * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
@@ -39,12 +38,12 @@ class TranslatableMappingTest extends BaseTestCaseOM
 
         $xmlDriver = new XmlDriver(__DIR__.'/../Driver/Xml');
 
-        $chain = new DriverChain;
+        $chain = new DriverChain();
         $chain->addDriver($annotationDriver, 'Gedmo\Translatable');
         $chain->addDriver($xmlDriver, 'Mapping\Fixture\Xml');
 
-        $this->translatable = new TranslatableListener;
-        $this->evm = new EventManager;
+        $this->translatable = new TranslatableListener();
+        $this->evm = new EventManager();
         $this->evm->addEventSubscriber($this->translatable);
 
         $this->em = $this->getMockSqliteEntityManager(array(

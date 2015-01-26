@@ -5,10 +5,7 @@ namespace Gedmo\SoftDeleteable\Query\TreeWalker;
 use Doctrine\ORM\Query\SqlWalker;
 use Doctrine\ORM\Query\AST\DeleteStatement;
 use Doctrine\ORM\Query\AST\DeleteClause;
-use Doctrine\ORM\Query\AST\UpdateClause;
-use Doctrine\ORM\Query\AST\UpdateItem;
 use Doctrine\ORM\Query\Exec\SingleTableDeleteUpdateExecutor;
-use Doctrine\ORM\Query\AST\PathExpression;
 use Gedmo\SoftDeleteable\SoftDeleteableListener;
 use Gedmo\SoftDeleteable\Query\TreeWalker\Exec\MultiTableDeleteExecutor;
 
@@ -19,9 +16,6 @@ use Gedmo\SoftDeleteable\Query\TreeWalker\Exec\MultiTableDeleteExecutor;
  *
  * @author Gustavo Falco <comfortablynumb84@gmail.com>
  * @author Gediminas Morkevicius <gediminas.morkevicius@gmail.com>
- * @package Gedmo.Query.TreeWalker
- * @subpackage SoftDeleteableWalker
- * @link http://www.gediminasm.org
  * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
 
@@ -34,14 +28,14 @@ class SoftDeleteableWalker extends SqlWalker
     protected $alias;
     protected $deletedAtField;
     protected $meta;
-    
+
     /**
      * {@inheritDoc}
      */
     public function __construct($query, $parserResult, array $queryComponents)
     {
         parent::__construct($query, $parserResult, $queryComponents);
-        
+
         $this->conn = $this->getConnection();
         $this->platform = $this->conn->getDatabasePlatform();
         $this->listener = $this->getSoftDeleteableListener();
@@ -68,7 +62,8 @@ class SoftDeleteableWalker extends SqlWalker
     /**
      * Change a DELETE clause for an UPDATE clause
      *
-     * @param DeleteClause
+     * @param DeleteClause $deleteClause
+     *
      * @return string The SQL.
      */
     public function walkDeleteClause(DeleteClause $deleteClause)
@@ -79,8 +74,8 @@ class SoftDeleteableWalker extends SqlWalker
         $this->setSQLTableAlias($tableName, $tableName, $deleteClause->aliasIdentificationVariable);
         $quotedTableName = $class->getQuotedTableName($this->platform);
         $quotedColumnName = $class->getQuotedColumnName($this->deletedAtField, $this->platform);
-        
-        $sql = 'UPDATE '.$quotedTableName.' SET '.$quotedColumnName.' = "'.date('Y-m-d H:i:s').'"';
+
+        $sql = 'UPDATE '.$quotedTableName.' SET '.$quotedColumnName.' = '.$this->conn->quote(date('Y-m-d H:i:s'));
 
         return $sql;
     }
@@ -89,6 +84,7 @@ class SoftDeleteableWalker extends SqlWalker
      * Get the currently used SoftDeleteableListener
      *
      * @throws \Gedmo\Exception\RuntimeException - if listener is not found
+     *
      * @return SoftDeleteableListener
      */
     private function getSoftDeleteableListener()
@@ -120,12 +116,13 @@ class SoftDeleteableWalker extends SqlWalker
      * Search for components in the delete clause
      *
      * @param array $queryComponents
+     *
      * @return void
      */
     private function extractComponents(array $queryComponents)
     {
         $em = $this->getEntityManager();
-        
+
         foreach ($queryComponents as $alias => $comp) {
             if (!isset($comp['metadata'])) {
                 continue;

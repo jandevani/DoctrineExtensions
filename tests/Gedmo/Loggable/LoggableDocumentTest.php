@@ -4,9 +4,9 @@ namespace Gedmo\Loggable;
 
 use Tool\BaseTestCaseMongoODM;
 use Doctrine\Common\EventManager;
-use Loggable\Fixture\Document\Article,
-    Loggable\Fixture\Document\RelatedArticle,
-    Loggable\Fixture\Document\Comment;
+use Loggable\Fixture\Document\Article;
+use Loggable\Fixture\Document\RelatedArticle;
+use Loggable\Fixture\Document\Comment;
 
 /**
  * These are tests for loggable behavior
@@ -14,7 +14,6 @@ use Loggable\Fixture\Document\Article,
  * @author Boussekeyt Jules <jules.boussekeyt@gmail.com>
  * @author Gediminas Morkevicius <gediminas.morkevicius@gmail.com>
  *
- * @package Gedmo.Loggable
  * @link http://www.gediminasm.org
  * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
@@ -110,11 +109,11 @@ class LoggableDocumentTest extends BaseTestCaseMongoODM
 
     private function populate()
     {
-        $article = new RelatedArticle;
+        $article = new RelatedArticle();
         $article->setTitle('a1-t-v1');
         $article->setContent('a1-c-v1');
 
-        $comment = new Comment;
+        $comment = new Comment();
         $comment->setArticle($article);
         $comment->setMessage('m-v1');
         $comment->setSubject('s-v1');
@@ -131,7 +130,7 @@ class LoggableDocumentTest extends BaseTestCaseMongoODM
         $this->dm->persist($comment);
         $this->dm->flush();
 
-        $article2 = new RelatedArticle;
+        $article2 = new RelatedArticle();
         $article2->setTitle('a2-t-v1');
         $article2->setContent('a2-c-v1');
 

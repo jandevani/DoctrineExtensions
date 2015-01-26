@@ -10,7 +10,6 @@ use Sluggable\Fixture\Issue104\Car;
  * These are tests for Sluggable behavior
  *
  * @author Gediminas Morkevicius <gediminas.morkevicius@gmail.com>
- * @package Gedmo.Sluggable
  * @link http://www.gediminasm.org
  * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
@@ -29,11 +28,11 @@ class Issue104Test extends BaseTestCaseORM
      */
     public function shouldThrowAnExceptionWhenMappedSuperclassProtectedProperty()
     {
-        $evm = new EventManager;
-        $evm->addEventSubscriber(new SluggableListener);
+        $evm = new EventManager();
+        $evm->addEventSubscriber(new SluggableListener());
         $this->getMockSqliteEntityManager($evm);
 
-        $audi = new Car;
+        $audi = new Car();
         $audi->setDescription('audi car');
         $audi->setTitle('Audi');
 
@@ -44,7 +43,7 @@ class Issue104Test extends BaseTestCaseORM
     protected function getUsedEntityFixtures()
     {
         return array(
-            self::CAR
+            self::CAR,
         );
     }
 }

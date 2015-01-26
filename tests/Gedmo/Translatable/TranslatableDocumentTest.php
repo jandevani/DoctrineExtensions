@@ -11,7 +11,6 @@ use Translatable\Fixture\Document\Article;
  * These are tests for Translatable behavior ODM implementation
  *
  * @author Gediminas Morkevicius <gediminas.morkevicius@gmail.com>
- * @package Gedmo.Translatable
  * @link http://www.gediminasm.org
  * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
@@ -27,10 +26,10 @@ class TranslatableDocumentTest extends BaseTestCaseMongoODM
     {
         parent::setUp();
         $evm = new EventManager();
-        $this->translatableListener = new TranslatableListener;
+        $this->translatableListener = new TranslatableListener();
         $this->translatableListener->setDefaultLocale('en_us');
         $this->translatableListener->setTranslatableLocale('en_us');
-        $evm->addEventSubscriber(new SluggableListener);
+        $evm->addEventSubscriber(new SluggableListener());
         $evm->addEventSubscriber($this->translatableListener);
 
         $this->getMockDocumentManager($evm);

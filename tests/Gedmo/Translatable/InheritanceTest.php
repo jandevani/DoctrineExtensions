@@ -14,7 +14,6 @@ use Gedmo\Translatable\Query\TreeWalker\TranslationWalker;
  * These are tests for translatable behavior
  *
  * @author Gediminas Morkevicius <gediminas.morkevicius@gmail.com>
- * @package Gedmo.Translatable
  * @link http://www.gediminasm.org
  * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
@@ -33,7 +32,7 @@ class InheritanceTest extends BaseTestCaseORM
     {
         parent::setUp();
 
-        $evm = new EventManager;
+        $evm = new EventManager();
         $this->translatableListener = new TranslatableListener();
         $this->translatableListener->setTranslatableLocale('en');
         $this->translatableListener->setDefaultLocale('en');
@@ -45,7 +44,7 @@ class InheritanceTest extends BaseTestCaseORM
     /**
      * @test
      */
-    function shouldHandleMappedSuperclass()
+    public function shouldHandleMappedSuperclass()
     {
         $article = new TemplatedArticle();
         $article->setName('name in en');
@@ -90,13 +89,13 @@ class InheritanceTest extends BaseTestCaseORM
     /**
      * @test
      */
-    function shouldHandleInheritedTranslationsThroughBaseObjectClass()
+    public function shouldHandleInheritedTranslationsThroughBaseObjectClass()
     {
-        $file = new File;
+        $file = new File();
         $file->setSize(500);
         $file->setName('file en');
 
-        $image = new Image;
+        $image = new Image();
         $image->setMime('mime en');
         $image->setName('image en');
         $image->setSize(445);
@@ -116,7 +115,7 @@ class InheritanceTest extends BaseTestCaseORM
         $this->em->flush();
         $this->em->clear();
 
-        $dql = 'SELECT f FROM ' . self::FILE . ' f';
+        $dql = 'SELECT f FROM '.self::FILE.' f';
         $q = $this->em->createQuery($dql);
         $q->setHint(Query::HINT_CUSTOM_OUTPUT_WALKER, self::TREE_WALKER_TRANSLATION);
 
@@ -138,7 +137,7 @@ class InheritanceTest extends BaseTestCaseORM
             self::ARTICLE,
             self::TRANSLATION,
             self::FILE,
-            self::IMAGE
+            self::IMAGE,
         );
     }
 }

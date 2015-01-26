@@ -10,7 +10,6 @@ use Sluggable\Fixture\Position;
  * These are tests for Sluggable behavior
  *
  * @author Gediminas Morkevicius <gediminas.morkevicius@gmail.com>
- * @package Gedmo.Sluggable
  * @link http://www.gediminasm.org
  * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
@@ -22,8 +21,8 @@ class SluggablePositionTest extends BaseTestCaseORM
     {
         parent::setUp();
 
-        $evm = new EventManager;
-        $evm->addEventSubscriber(new SluggableListener);
+        $evm = new EventManager();
+        $evm->addEventSubscriber(new SluggableListener());
 
         $this->getMockSqliteEntityManager($evm);
         $this->populate();
@@ -49,7 +48,7 @@ class SluggablePositionTest extends BaseTestCaseORM
     private function populate()
     {
         $meta = $this->em->getClassMetadata(self::POSITION);
-        $object = new Position;
+        $object = new Position();
         $meta->getReflectionProperty('title')->setValue($object, 'title');
         $meta->getReflectionProperty('prop')->setValue($object, 'prop');
         $meta->getReflectionProperty('code')->setValue($object, 'code');

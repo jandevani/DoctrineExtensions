@@ -41,7 +41,7 @@ class CategoryUuid implements NodeInterface
      * @Gedmo\TreeParent
      * @ORM\ManyToOne(targetEntity="CategoryUuid", inversedBy="children")
      * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="parent_id", referencedColumnName="id", onDelete="SET NULL")
+     *   @ORM\JoinColumn(name="parent_id", referencedColumnName="id", onDelete="CASCADE")
      * })
      */
     private $parentId;
@@ -74,7 +74,8 @@ class CategoryUuid implements NodeInterface
      * @return void
      * @ORM\PrePersist
      */
-    public function createId(){
+    public function createId()
+    {
         $this->id = bin2hex(pack('N2', mt_rand(), mt_rand()));
     }
 

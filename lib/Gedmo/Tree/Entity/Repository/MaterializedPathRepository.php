@@ -2,10 +2,8 @@
 
 namespace Gedmo\Tree\Entity\Repository;
 
-use Gedmo\Exception\InvalidArgumentException,
-    Gedmo\Tree\Strategy,
-    Gedmo\Tree\Strategy\ORM\MaterializedPath,
-    Gedmo\Tool\Wrapper\EntityWrapper;
+use Gedmo\Tree\Strategy;
+use Gedmo\Tool\Wrapper\EntityWrapper;
 
 /**
  * The MaterializedPathRepository has some useful functions
@@ -14,9 +12,6 @@ use Gedmo\Exception\InvalidArgumentException,
  *
  * @author Gustavo Falco <comfortablynumb84@gmail.com>
  * @author Gediminas Morkevicius <gediminas.morkevicius@gmail.com>
- * @package Gedmo.Tree.Entity.Repository
- * @subpackage MaterializedPathRepository
- * @link http://www.gediminasm.org
  * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
 class MaterializedPathRepository extends AbstractTreeRepository
@@ -24,9 +19,9 @@ class MaterializedPathRepository extends AbstractTreeRepository
     /**
      * Get tree query builder
      *
-     * @param object Root node
+     * @param object $rootNode
      *
-     * @return Doctrine\ORM\QueryBuilder
+     * @return \Doctrine\ORM\QueryBuilder
      */
     public function getTreeQueryBuilder($rootNode = null)
     {
@@ -36,9 +31,9 @@ class MaterializedPathRepository extends AbstractTreeRepository
     /**
      * Get tree query
      *
-     * @param object Root node
+     * @param object $rootNode
      *
-     * @return Doctrine\ORM\Query
+     * @return \Doctrine\ORM\Query
      */
     public function getTreeQuery($rootNode = null)
     {
@@ -48,7 +43,7 @@ class MaterializedPathRepository extends AbstractTreeRepository
     /**
      * Get tree
      *
-     * @param object Root node
+     * @param object $rootNode
      *
      * @return array
      */
@@ -91,36 +86,57 @@ class MaterializedPathRepository extends AbstractTreeRepository
         $separator = addcslashes($config['path_separator'], '%');
         $alias = 'materialized_path_entity';
         $path = $config['path'];
-        $qb = $this->_em->createQueryBuilder($meta->name)
+        $qb = $this->getQueryBuilder()
             ->select($alias)
-            ->from($meta->name, $alias);
+            ->from($config['useObjectClass'], $alias);
         $expr = '';
+        $includeNodeExpr = '';
 
         if (is_object($node) && $node instanceof $meta->name) {
             $node = new EntityWrapper($node, $this->_em);
             $nodePath = $node->getPropertyValue($path);
             $expr = $qb->expr()->andx()->add(
-                $qb->expr()->like($alias.'.'.$path, $qb->expr()->literal($nodePath.'%'))
+                $qb->expr()->like(
+                    $alias.'.'.$path,
+                    $qb->expr()->literal(
+                        $nodePath
+                        .($config['path_ends_with_separator'] ? '' : $separator).'%'
+                    )
+                )
             );
 
-            if (!$includeNode) {
+            if ($includeNode) {
+                $includeNodeExpr = $qb->expr()->eq($alias.'.'.$path, $qb->expr()->literal($nodePath));
+            } else {
                 $expr->add($qb->expr()->neq($alias.'.'.$path, $qb->expr()->literal($nodePath)));
             }
 
             if ($direct) {
                 $expr->add(
-                    $qb->expr()->not(
-                        $qb->expr()->like($alias.'.'.$path, $qb->expr()->literal($nodePath.'%'.$separator.'%'.$separator))
-                ));
+                    $qb->expr()->orx(
+                        $qb->expr()->eq($alias.'.'.$config['level'], $qb->expr()->literal($node->getPropertyValue($config['level']))),
+                        $qb->expr()->eq($alias.'.'.$config['level'], $qb->expr()->literal($node->getPropertyValue($config['level']) + 1))
+                    )
+                );
             }
-        } else if ($direct) {
+        } elseif ($direct) {
             $expr = $qb->expr()->not(
-                $qb->expr()->like($alias.'.'.$path, $qb->expr()->literal('%'.$separator.'%'.$separator.'%'))
+                $qb->expr()->like($alias.'.'.$path,
+                    $qb->expr()->literal(
+                        ($config['path_starts_with_separator'] ? $separator : '')
+                        .'%'.$separator.'%'
+                        .($config['path_ends_with_separator'] ? $separator : '')
+                    )
+                )
             );
         }
 
         if ($expr) {
             $qb->where('('.$expr.')');
+        }
+
+        if ($includeNodeExpr) {
+            $qb->orWhere('('.$includeNodeExpr.')');
         }
 
         $orderByField = is_null($sortByField) ? $alias.'.'.$config['path'] : $alias.'.'.$sortByField;
@@ -153,7 +169,7 @@ class MaterializedPathRepository extends AbstractTreeRepository
     {
         $sortBy = array(
             'field'     => null,
-            'dir'       => 'asc'
+            'dir'       => 'asc',
         );
 
         if (isset($options['childSort'])) {

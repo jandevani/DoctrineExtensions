@@ -3,7 +3,6 @@
 namespace Gedmo\Translator\Entity;
 
 use Gedmo\Translator\Translation as BaseTranslation;
-
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\MappedSuperclass;
 use Doctrine\ORM\Mapping\Id;
@@ -13,7 +12,6 @@ use Doctrine\ORM\Mapping\GeneratedValue;
  * Entity translation class.
  *
  * @author  Konstantin Kudryashov <ever.zet@gmail.com>
- * @link    http://www.gediminasm.org
  * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
  *
  * @MappedSuperclass
@@ -44,7 +42,7 @@ abstract class Translation extends BaseTranslation
     protected $property;
 
     /**
-     * @var text $value
+     * @var string $value
      *
      * @Column(type="text", nullable=true)
      */

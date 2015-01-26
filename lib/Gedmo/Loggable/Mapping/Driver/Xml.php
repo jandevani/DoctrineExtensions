@@ -2,21 +2,18 @@
 
 namespace Gedmo\Loggable\Mapping\Driver;
 
-use Gedmo\Mapping\Driver\Xml as BaseXml,
-    Gedmo\Exception\InvalidMappingException;
+use Gedmo\Mapping\Driver\Xml as BaseXml;
+use Gedmo\Exception\InvalidMappingException;
 
 /**
  * This is a xml mapping driver for Loggable
  * behavioral extension. Used for extraction of extended
- * metadata from xml specificaly for Loggable
+ * metadata from xml specifically for Loggable
  * extension.
  *
  * @author Boussekeyt Jules <jules.boussekeyt@gmail.com>
  * @author Gediminas Morkevicius <gediminas.morkevicius@gmail.com>
  * @author Miha Vrhovnik <miha.vrhovnik@gmail.com>
- * @package Gedmo.Loggable.Mapping.Driver
- * @subpackage Xml
- * @link http://www.gediminasm.org
  * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
 class Xml extends BaseXml
@@ -34,10 +31,10 @@ class Xml extends BaseXml
 
         $xml = $xml->children(self::GEDMO_NAMESPACE_URI);
 
-        if ($xmlDoctrine->getName() == 'entity' || $xmlDoctrine->getName() == 'mapped-superclass') {
+        if ($xmlDoctrine->getName() == 'entity' || $xmlDoctrine->getName() == 'document' || $xmlDoctrine->getName() == 'mapped-superclass') {
             if (isset($xml->loggable)) {
                 /**
-                 * @var SimpleXMLElement $data;
+                 * @var \SimpleXMLElement $data;
                  */
                 $data = $xml->loggable;
                 $config['loggable'] = true;
@@ -60,13 +57,16 @@ class Xml extends BaseXml
         if (isset($xmlDoctrine->{'one-to-one'})) {
             $this->inspectElementForVersioned($xmlDoctrine->{'one-to-one'}, $config, $meta);
         }
+        if (isset($xmlDoctrine->{'reference-one'})) {
+            $this->inspectElementForVersioned($xmlDoctrine->{'reference-one'}, $config, $meta);
+        }
 
         if (!$meta->isMappedSuperclass && $config) {
             if (is_array($meta->identifier) && count($meta->identifier) > 1) {
                 throw new InvalidMappingException("Loggable does not support composite identifiers in class - {$meta->name}");
             }
             if (isset($config['versioned']) && !isset($config['loggable'])) {
-                throw new InvalidMappingException("Class must be annoted with Loggable annotation in order to track versioned fields in class - {$meta->name}");
+                throw new InvalidMappingException("Class must be annotated with Loggable annotation in order to track versioned fields in class - {$meta->name}");
             }
         }
     }
@@ -74,9 +74,9 @@ class Xml extends BaseXml
     /**
      * Searches mappings on element for versioned fields
      *
-     * @param SimpleXMLElement $element
-     * @param array $config
-     * @param object $meta
+     * @param \SimpleXMLElement $element
+     * @param array             $config
+     * @param object            $meta
      */
     private function inspectElementForVersioned(\SimpleXMLElement $element, array &$config, $meta)
     {

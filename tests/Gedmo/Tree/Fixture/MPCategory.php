@@ -2,7 +2,6 @@
 
 namespace Tree\Fixture;
 
-use Gedmo\Tree\Node as NodeInterface;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -35,7 +34,7 @@ class MPCategory
      * @Gedmo\TreeParent
      * @ORM\ManyToOne(targetEntity="MPCategory", inversedBy="children")
      * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="parent_id", referencedColumnName="id", onDelete="SET NULL")
+     *   @ORM\JoinColumn(name="parent_id", referencedColumnName="id", onDelete="CASCADE")
      * })
      */
     private $parentId;

@@ -11,7 +11,6 @@ use Translatable\Fixture\Document\Personal\ArticleTranslation;
  * These are tests for translatable behavior
  *
  * @author Gediminas Morkevicius <gediminas.morkevicius@gmail.com>
- * @package Gedmo.Translatable
  * @link http://www.gediminasm.org
  * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
@@ -27,7 +26,7 @@ class PersonalTranslationDocumentTest extends BaseTestCaseMongoODM
     {
         parent::setUp();
 
-        $evm = new EventManager;
+        $evm = new EventManager();
         $this->translatableListener = new TranslatableListener();
         $this->translatableListener->setDefaultLocale('en');
         $this->translatableListener->setTranslatableLocale('en');
@@ -39,7 +38,7 @@ class PersonalTranslationDocumentTest extends BaseTestCaseMongoODM
     /**
      * @test
      */
-    function shouldCreateTranslations()
+    public function shouldCreateTranslations()
     {
         $this->populate();
         $article = $this->dm->getRepository(self::ARTICLE)->find($this->id);
@@ -51,7 +50,7 @@ class PersonalTranslationDocumentTest extends BaseTestCaseMongoODM
     /**
      * @test
      */
-    function shouldTranslateTheRecord()
+    public function shouldTranslateTheRecord()
     {
         $this->populate();
         $this->translatableListener->setTranslatableLocale('lt');
@@ -62,7 +61,7 @@ class PersonalTranslationDocumentTest extends BaseTestCaseMongoODM
 
     private function populate()
     {
-        $article = new Article;
+        $article = new Article();
         $article->setTitle('en');
 
         $this->dm->persist($article);
@@ -73,7 +72,7 @@ class PersonalTranslationDocumentTest extends BaseTestCaseMongoODM
         $this->translatableListener->setTranslatableLocale('de');
         $article->setTitle('de');
 
-        $ltTranslation = new ArticleTranslation;
+        $ltTranslation = new ArticleTranslation();
         $ltTranslation
             ->setField('title')
             ->setContent('lt')

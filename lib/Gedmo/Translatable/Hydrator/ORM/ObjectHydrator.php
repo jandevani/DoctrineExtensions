@@ -12,9 +12,6 @@ use Doctrine\ORM\Internal\Hydration\ObjectHydrator as BaseObjectHydrator;
  * of the fields
  *
  * @author Gediminas Morkevicius <gediminas.morkevicius@gmail.com>
- * @package Gedmo.Translatable.Hydrator.ORM
- * @subpackage ObjectHydrator
- * @link http://www.gediminasm.org
  * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
 class ObjectHydrator extends BaseObjectHydrator
@@ -29,6 +26,7 @@ class ObjectHydrator extends BaseObjectHydrator
         $listener->setSkipOnLoad(true);
         $result = parent::_hydrateAll();
         $listener->setSkipOnLoad(false);
+
         return $result;
     }
 
@@ -42,6 +40,7 @@ class ObjectHydrator extends BaseObjectHydrator
         $listener->setSkipOnLoad(true);
         $result = parent::hydrateAllData();
         $listener->setSkipOnLoad(false);
+
         return $result;
     }
 
@@ -49,6 +48,7 @@ class ObjectHydrator extends BaseObjectHydrator
      * Get the currently used TranslatableListener
      *
      * @throws \Gedmo\Exception\RuntimeException - if listener is not found
+     *
      * @return TranslatableListener
      */
     protected function getTranslatableListener()
@@ -69,6 +69,7 @@ class ObjectHydrator extends BaseObjectHydrator
         if (is_null($translatableListener)) {
             throw new \Gedmo\Exception\RuntimeException('The translation listener could not be found');
         }
+
         return $translatableListener;
     }
 }

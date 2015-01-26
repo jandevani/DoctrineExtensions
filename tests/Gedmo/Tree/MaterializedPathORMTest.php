@@ -10,7 +10,6 @@ use Tool\BaseTestCaseORM;
  *
  * @author Gustavo Falco <comfortablynumb84@gmail.com>
  * @author Gediminas Morkevicius <gediminas.morkevicius@gmail.com>
- * @package Gedmo.Tree
  * @link http://www.gediminasm.org
  * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
@@ -25,9 +24,9 @@ class MaterializedPathORMTest extends BaseTestCaseORM
     {
         parent::setUp();
 
-        $this->listener = new TreeListener;
+        $this->listener = new TreeListener();
 
-        $evm = new EventManager;
+        $evm = new EventManager();
         $evm->addEventSubscriber($this->listener);
 
         $this->getMockSqliteEntityManager($evm);
@@ -39,7 +38,7 @@ class MaterializedPathORMTest extends BaseTestCaseORM
     /**
      * @test
      */
-    function insertUpdateAndRemove()
+    public function insertUpdateAndRemove()
     {
         // Insert
         $category = $this->createCategory();
@@ -98,7 +97,7 @@ class MaterializedPathORMTest extends BaseTestCaseORM
         $this->em->flush();
 
         $result = $this->em->createQueryBuilder()->select('c')->from(self::CATEGORY, 'c')->getQuery()->execute();
-        
+
         $firstResult = $result[0];
 
         $this->assertCount(1, $result);
@@ -123,13 +122,14 @@ class MaterializedPathORMTest extends BaseTestCaseORM
     public function createCategory()
     {
         $class = self::CATEGORY;
-        return new $class;
+
+        return new $class();
     }
 
     protected function getUsedEntityFixtures()
     {
         return array(
-            self::CATEGORY
+            self::CATEGORY,
         );
     }
 

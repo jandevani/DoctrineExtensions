@@ -10,7 +10,6 @@ use Translatable\Fixture\Issue165\SimpleArticle;
  * These are tests for Translatable behavior ODM implementation
  *
  * @author Gediminas Morkevicius <gediminas.morkevicius@gmail.com>
- * @package Gedmo.Translatable
  * @link http://www.gediminasm.org
  * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
@@ -26,7 +25,7 @@ class Issue165Test extends BaseTestCaseMongoODM
     {
         parent::setUp();
         $evm = new EventManager();
-        $this->translatableListener = new TranslatableListener;
+        $this->translatableListener = new TranslatableListener();
         $this->translatableListener->setDefaultLocale('en');
         $this->translatableListener->setTranslatableLocale('en');
         $evm->addEventSubscriber($this->translatableListener);
@@ -39,7 +38,7 @@ class Issue165Test extends BaseTestCaseMongoODM
      */
     public function shouldPersistUntranslatedFields()
     {
-        $article = new SimpleArticle;
+        $article = new SimpleArticle();
         $article->setTitle('en');
         $article->setContent('en');
         $article->setUntranslated('en');
@@ -62,7 +61,7 @@ class Issue165Test extends BaseTestCaseMongoODM
 
         $this->translatableListener->setTranslatableLocale('de');
 
-        $newarticle = new SimpleArticle;
+        $newarticle = new SimpleArticle();
         $newarticle->setTitle('de');
         $newarticle->setContent('de');
         $newarticle->setUntranslated('de');

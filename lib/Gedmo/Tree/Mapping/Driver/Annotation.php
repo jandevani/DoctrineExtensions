@@ -2,20 +2,18 @@
 
 namespace Gedmo\Tree\Mapping\Driver;
 
-use Gedmo\Mapping\Driver\AbstractAnnotationDriver,
-    Gedmo\Exception\InvalidMappingException,
-    Gedmo\Tree\Mapping\Validator;
+use Gedmo\Mapping\Driver\AbstractAnnotationDriver;
+use Gedmo\Exception\InvalidMappingException;
+use Gedmo\Tree\Mapping\Validator;
 
 /**
  * This is an annotation mapping driver for Tree
  * behavioral extension. Used for extraction of extended
- * metadata from Annotations specificaly for Tree
+ * metadata from Annotations specifically for Tree
  * extension.
  *
  * @author Gediminas Morkevicius <gediminas.morkevicius@gmail.com>
- * @package Gedmo.Tree.Mapping.Driver
- * @subpackage Annotation
- * @link http://www.gediminasm.org
+ * @author <rocco@roccosportal.com>
  * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
 class Annotation extends AbstractAnnotationDriver
@@ -66,6 +64,11 @@ class Annotation extends AbstractAnnotationDriver
     const PATH_SOURCE = 'Gedmo\\Mapping\\Annotation\\TreePathSource';
 
     /**
+     * Annotation to specify path hash class
+     */
+    const PATH_HASH = 'Gedmo\\Mapping\\Annotation\\TreePathHash';
+
+    /**
      * Annotation to mark the field to be used to hold the lock time
      */
     const LOCK_TIME = 'Gedmo\\Mapping\\Annotation\\TreeLockTime';
@@ -78,7 +81,7 @@ class Annotation extends AbstractAnnotationDriver
     protected $strategies = array(
         'nested',
         'closure',
-        'materializedPath'
+        'materializedPath',
     );
 
     /**
@@ -183,6 +186,9 @@ class Annotation extends AbstractAnnotationDriver
                 }
                 $config['path'] = $field;
                 $config['path_separator'] = $pathAnnotation->separator;
+                $config['path_append_id'] = $pathAnnotation->appendId;
+                $config['path_starts_with_separator'] = $pathAnnotation->startsWithSeparator;
+                $config['path_ends_with_separator'] = $pathAnnotation->endsWithSeparator;
             }
             // path source
             if ($this->reader->getPropertyAnnotation($property, self::PATH_SOURCE)) {
@@ -194,6 +200,18 @@ class Annotation extends AbstractAnnotationDriver
                     throw new InvalidMappingException("Tree PathSource field - [{$field}] type is not valid. It can be any of the integer variants, double, float or string in class - {$meta->name}");
                 }
                 $config['path_source'] = $field;
+            }
+
+             // path hash
+            if ($this->reader->getPropertyAnnotation($property, self::PATH_HASH)) {
+                $field = $property->getName();
+                if (!$meta->hasField($field)) {
+                    throw new InvalidMappingException("Unable to find 'path_hash' - [{$field}] as mapped property in entity - {$meta->name}");
+                }
+                if (!$validator->isValidFieldForPathHash($meta, $field)) {
+                    throw new InvalidMappingException("Tree PathHash field - [{$field}] type is not valid. It can be any of the integer variants, double, float or string in class - {$meta->name}");
+                }
+                $config['path_hash'] = $field;
             }
             // lock time
 
@@ -218,7 +236,7 @@ class Annotation extends AbstractAnnotationDriver
                 if (is_array($meta->identifier) && count($meta->identifier) > 1) {
                     throw new InvalidMappingException("Tree does not support composite identifiers in class - {$meta->name}");
                 }
-                $method = 'validate' . ucfirst($config['strategy']) . 'TreeMetadata';
+                $method = 'validate'.ucfirst($config['strategy']).'TreeMetadata';
                 $validator->$method($meta, $config);
             } else {
                 throw new InvalidMappingException("Cannot find Tree type for class: {$meta->name}");

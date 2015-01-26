@@ -2,10 +2,9 @@
 
 namespace Gedmo\Tree\Document\MongoDB\Repository;
 
-use Gedmo\Exception\InvalidArgumentException,
-    Gedmo\Tree\Strategy,
-    Gedmo\Tree\Strategy\ODM\MongoDB\MaterializedPath,
-    Gedmo\Tool\Wrapper\MongoDocumentWrapper;
+use Gedmo\Exception\InvalidArgumentException;
+use Gedmo\Tree\Strategy;
+use Gedmo\Tool\Wrapper\MongoDocumentWrapper;
 
 /**
  * The MaterializedPathRepository has some useful functions
@@ -14,9 +13,6 @@ use Gedmo\Exception\InvalidArgumentException,
  *
  * @author Gustavo Falco <comfortablynumb84@gmail.com>
  * @author Gediminas Morkevicius <gediminas.morkevicius@gmail.com>
- * @package Gedmo.Tree.Document.MongoDB.Repository
- * @subpackage MaterializedPathRepository
- * @link http://www.gediminasm.org
  * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
 class MaterializedPathRepository extends AbstractTreeRepository
@@ -24,7 +20,7 @@ class MaterializedPathRepository extends AbstractTreeRepository
     /**
      * Get tree query builder
      *
-     * @param object Root node
+     * @param object $rootNode
      *
      * @return \Doctrine\ODM\MongoDB\Query\Builder
      */
@@ -36,7 +32,7 @@ class MaterializedPathRepository extends AbstractTreeRepository
     /**
      * Get tree query
      *
-     * @param object Root node
+     * @param object $rootNode
      *
      * @return \Doctrine\ODM\MongoDB\Query\Query
      */
@@ -48,7 +44,7 @@ class MaterializedPathRepository extends AbstractTreeRepository
     /**
      * Get tree
      *
-     * @param object Root node
+     * @param object $rootNode
      *
      * @return \Doctrine\ODM\MongoDB\Cursor
      */
@@ -128,12 +124,11 @@ class MaterializedPathRepository extends AbstractTreeRepository
                      $nodePath,
                      $separator,
                      $separator);
-                
             } else {
                 $regex = sprintf('/^%s(.+)'.($includeNode ? '?' : '').'/',
                      $nodePath);
             }
-        } else if ($direct) {
+        } elseif ($direct) {
             $regex = sprintf('/^([^%s]+)'.($includeNode ? '?' : '').'%s$/',
                 $separator,
                 $separator);
@@ -171,7 +166,7 @@ class MaterializedPathRepository extends AbstractTreeRepository
     {
         $sortBy = array(
             'field'     => null,
-            'dir'       => 'asc'
+            'dir'       => 'asc',
         );
 
         if (isset($options['childSort'])) {

@@ -2,9 +2,6 @@
 
 namespace Gedmo\Translatable;
 
-use Doctrine\ORM\Mapping\Driver\DriverChain;
-use Doctrine\ORM\Mapping\Driver\SimplifiedXmlDriver;
-use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
 use Doctrine\Common\EventManager;
 use Tool\BaseTestCaseORM;
 use Translatable\Fixture\Article;
@@ -15,7 +12,6 @@ use Translatable\Fixture\Sport;
  * These are tests for translatable behavior
  *
  * @author Gediminas Morkevicius <gediminas.morkevicius@gmail.com>
- * @package Gedmo.Translatable
  * @link http://www.gediminasm.org
  * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
@@ -33,7 +29,7 @@ class TranslatableTest extends BaseTestCaseORM
     {
         parent::setUp();
 
-        $evm = new EventManager;
+        $evm = new EventManager();
         $this->translatableListener = new TranslatableListener();
         $this->translatableListener->setTranslatableLocale('en_us');
         $this->translatableListener->setDefaultLocale('en_us');
@@ -45,7 +41,47 @@ class TranslatableTest extends BaseTestCaseORM
     /**
      * @test
      */
-    function shouldPersistDefaultLocaleTranslationIfRequired()
+    public function shouldUpdateTranslationInDefaultLocaleIssue751()
+    {
+        $this->translatableListener->setTranslatableLocale('en');
+        $this->translatableListener->setDefaultLocale('en');
+        $repo = $this->em->getRepository(self::ARTICLE);
+
+        $entity = new Article();
+        $entity->setTranslatableLocale('de');
+        $entity->setTitle('test');
+        $this->em->persist($entity);
+        $this->em->flush();
+
+        $entity->setTranslatableLocale('de');
+        $entity->setTitle('test!');
+        $this->em->persist($entity);
+        $this->em->flush();
+        $this->em->clear();
+
+        // this will force it to find translation in "en" locale, since listener has "en" set
+        // and since default locale is "en" current translation will be "test"
+        // setting title to "test" will not even persist entity, since there is no changeset
+        $entity = $repo->findOneById($entity->getId());
+        $entity->setTranslatableLocale('de');
+        $entity->setTitle('test');
+        $this->em->persist($entity);
+        $this->em->flush();
+
+        $this->em->clear();
+        $entity = $repo->findOneById($entity->getId());
+        $repo = $this->em->getRepository(self::TRANSLATION);
+
+        $translations = $repo->findTranslations($entity);
+        $this->assertArrayHasKey('de', $translations);
+        $this->assertSame('test!', $translations['de']['title']); // de translation was not updated, no changeset
+        $this->assertSame('test', $entity->getTitle()); // obviously "test" a default en translation
+    }
+
+    /**
+     * @test
+     */
+    public function shouldPersistDefaultLocaleTranslationIfRequired()
     {
         $this->translatableListener->setPersistDefaultLocaleTranslation(true);
 
@@ -66,7 +102,7 @@ class TranslatableTest extends BaseTestCaseORM
     /**
      * @test
      */
-    function shouldGenerateTranslations()
+    public function shouldGenerateTranslations()
     {
         $this->populate();
         $repo = $this->em->getRepository(self::TRANSLATION);
@@ -189,19 +225,19 @@ class TranslatableTest extends BaseTestCaseORM
     /**
      * @test
      */
-    function shouldSolveTranslationFallbackGithubIssue9()
+    public function shouldSolveTranslationFallbackGithubIssue9()
     {
         $this->populate();
         $this->translatableListener->setTranslationFallback(false);
         $this->translatableListener->setTranslatableLocale('ru_RU');
 
         $article = $this->em->find(self::ARTICLE, $this->articleId);
-        $this->assertFalse((bool)$article->getTitle());
-        $this->assertFalse((bool)$article->getContent());
+        $this->assertFalse((bool) $article->getTitle());
+        $this->assertFalse((bool) $article->getContent());
 
         foreach ($article->getComments() as $comment) {
-            $this->assertFalse((bool)$comment->getSubject());
-            $this->assertFalse((bool)$comment->getMessage());
+            $this->assertFalse((bool) $comment->getSubject());
+            $this->assertFalse((bool) $comment->getMessage());
         }
         $this->em->clear();
         $this->translatableListener->setTranslationFallback(true);
@@ -214,9 +250,9 @@ class TranslatableTest extends BaseTestCaseORM
     /**
      * @test
      */
-    function shouldSolveGithubIssue64()
+    public function shouldSolveGithubIssue64()
     {
-        $judo = new Sport;
+        $judo = new Sport();
         $judo->setTitle('Judo');
         $judo->setDescription('Whatever');
 
@@ -250,9 +286,9 @@ class TranslatableTest extends BaseTestCaseORM
     /**
      * @test
      */
-    function shouldRespectFallbackOption()
+    public function shouldRespectFallbackOption()
     {
-        $article = new Article;
+        $article = new Article();
         $article->setTitle('Euro2012');
         $article->setAuthor('Shevchenko');
         $article->setViews(10);
@@ -283,7 +319,7 @@ class TranslatableTest extends BaseTestCaseORM
             self::ARTICLE,
             self::TRANSLATION,
             self::COMMENT,
-            self::SPORT
+            self::SPORT,
         );
     }
 

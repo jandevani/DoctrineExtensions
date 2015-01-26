@@ -4,16 +4,14 @@ namespace Gedmo\Loggable;
 
 use Tool\BaseTestCaseORM;
 use Doctrine\Common\EventManager;
-use Doctrine\Common\Util\Debug,
-    Loggable\Fixture\Entity\Article,
-    Loggable\Fixture\Entity\RelatedArticle,
-    Loggable\Fixture\Entity\Comment;
+use Loggable\Fixture\Entity\Article;
+use Loggable\Fixture\Entity\RelatedArticle;
+use Loggable\Fixture\Entity\Comment;
 
 /**
  * These are tests for loggable behavior
  *
  * @author Gediminas Morkevicius <gediminas.morkevicius@gmail.com>
- * @package Gedmo.Loggable
  * @link http://www.gediminasm.org
  * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
@@ -31,12 +29,36 @@ class LoggableEntityTest extends BaseTestCaseORM
     {
         parent::setUp();
 
-        $evm = new EventManager;
+        $evm = new EventManager();
         $this->LoggableListener = new LoggableListener();
         $this->LoggableListener->setUsername('jules');
         $evm->addEventSubscriber($this->LoggableListener);
 
         $this->em = $this->getMockSqliteEntityManager($evm);
+    }
+
+    /**
+     * @test
+     */
+    public function shouldHandleClonedEntity()
+    {
+        $art0 = new Article();
+        $art0->setTitle('Title');
+
+        $this->em->persist($art0);
+        $this->em->flush();
+
+        $art1 = clone $art0;
+        $art1->setTitle('Cloned');
+        $this->em->persist($art1);
+        $this->em->flush();
+
+        $logRepo = $this->em->getRepository('Gedmo\Loggable\Entity\LogEntry');
+        $logs = $logRepo->findAll();
+        $this->assertSame(2, count($logs));
+        $this->assertSame('create', $logs[0]->getAction());
+        $this->assertSame('create', $logs[1]->getAction());
+        $this->assertTrue($logs[0]->getObjectId() !== $logs[1]->getObjectId());
     }
 
     public function testLoggable()
@@ -118,17 +140,17 @@ class LoggableEntityTest extends BaseTestCaseORM
             self::COMMENT,
             self::COMMENT_LOG,
             self::RELATED_ARTICLE,
-            'Gedmo\Loggable\Entity\LogEntry'
+            'Gedmo\Loggable\Entity\LogEntry',
         );
     }
 
     private function populate()
     {
-        $article = new RelatedArticle;
+        $article = new RelatedArticle();
         $article->setTitle('a1-t-v1');
         $article->setContent('a1-c-v1');
 
-        $comment = new Comment;
+        $comment = new Comment();
         $comment->setArticle($article);
         $comment->setMessage('m-v1');
         $comment->setSubject('s-v1');
@@ -145,7 +167,7 @@ class LoggableEntityTest extends BaseTestCaseORM
         $this->em->persist($comment);
         $this->em->flush();
 
-        $article2 = new RelatedArticle;
+        $article2 = new RelatedArticle();
         $article2->setTitle('a2-t-v1');
         $article2->setContent('a2-c-v1');
 

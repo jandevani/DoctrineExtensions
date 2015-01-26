@@ -14,7 +14,6 @@ use Tool\BaseTestCaseOM;
  * These are mapping extension tests
  *
  * @author Gediminas Morkevicius <gediminas.morkevicius@gmail.com>
- * @package Gedmo.Mapping
  * @link http://www.gediminasm.org
  * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
@@ -39,18 +38,18 @@ class LoggableMappingTest extends BaseTestCaseOM
 
         $xmlDriver = new XmlDriver(__DIR__.'/../Driver/Xml');
 
-        $chain = new DriverChain;
+        $chain = new DriverChain();
         $chain->addDriver($annotationDriver, 'Gedmo\Loggable');
         $chain->addDriver($xmlDriver, 'Mapping\Fixture\Xml');
 
-        $this->loggable = new LoggableListener;
-        $this->evm = new EventManager;
+        $this->loggable = new LoggableListener();
+        $this->evm = new EventManager();
         $this->evm->addEventSubscriber($this->loggable);
 
         $this->em = $this->getMockSqliteEntityManager(array(
             'Gedmo\Loggable\Entity\LogEntry',
             'Mapping\Fixture\Xml\Loggable',
-            'Mapping\Fixture\Xml\Status'
+            'Mapping\Fixture\Xml\Status',
         ), $chain);
     }
 

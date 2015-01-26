@@ -4,20 +4,18 @@ namespace Gedmo\Tree;
 
 use Doctrine\Common\EventManager;
 use Tool\BaseTestCaseORM;
-use Doctrine\Common\Util\Debug,
-    Tree\Fixture\BehavioralCategory,
-    Tree\Fixture\Article,
-    Tree\Fixture\Comment,
-    Gedmo\Translatable\TranslatableListener,
-    Gedmo\Translatable\Entity\Translation,
-    Gedmo\Sluggable\SluggableListener,
-    Doctrine\ORM\Proxy\Proxy;
+use Tree\Fixture\BehavioralCategory;
+use Tree\Fixture\Article;
+use Tree\Fixture\Comment;
+use Gedmo\Translatable\TranslatableListener;
+use Gedmo\Translatable\Entity\Translation;
+use Gedmo\Sluggable\SluggableListener;
+use Doctrine\ORM\Proxy\Proxy;
 
 /**
  * These are tests for Tree behavior
  *
  * @author Gediminas Morkevicius <gediminas.morkevicius@gmail.com>
- * @package Gedmo.Tree
  * @link http://www.gediminasm.org
  * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
@@ -34,11 +32,11 @@ class TranslatableSluggableTreeTest extends BaseTestCaseORM
     {
         parent::setUp();
 
-        $evm = new EventManager;
-        $evm->addEventSubscriber(new TreeListener);
-        $this->translatableListener = new TranslatableListener;
+        $evm = new EventManager();
+        $evm->addEventSubscriber(new TreeListener());
+        $this->translatableListener = new TranslatableListener();
         $this->translatableListener->setTranslatableLocale('en_US');
-        $evm->addEventSubscriber(new SluggableListener);
+        $evm->addEventSubscriber(new SluggableListener());
         $evm->addEventSubscriber($this->translatableListener);
 
         $this->getMockSqliteEntityManager($evm);
@@ -112,7 +110,7 @@ class TranslatableSluggableTreeTest extends BaseTestCaseORM
             self::CATEGORY,
             self::ARTICLE,
             self::COMMENT,
-            self::TRANSLATION
+            self::TRANSLATION,
         );
     }
 

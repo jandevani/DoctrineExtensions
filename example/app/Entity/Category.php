@@ -34,7 +34,7 @@ class Category
 
     /**
      * @Gedmo\Translatable
-     * @Gedmo\Slug(fields={"title"})
+     * @Gedmo\Slug(fields={"created", "title"})
      * @ORM\Column(length=64, unique=true)
      */
     private $slug;
@@ -54,7 +54,7 @@ class Category
     /**
      * @Gedmo\TreeParent
      * @ORM\ManyToOne(targetEntity="Category", inversedBy="children")
-     * @ORM\JoinColumn(name="parent_id", referencedColumnName="id", onDelete="SET NULL")
+     * @ORM\JoinColumn(name="parent_id", referencedColumnName="id", onDelete="CASCADE")
      */
     private $parent;
 
@@ -86,6 +86,18 @@ class Category
      * @ORM\Column(type="datetime")
      */
     private $updated;
+
+    /**
+     * @Gedmo\Blameable(on="create")
+     * @ORM\Column(type="string")
+     */
+    private $createdBy;
+
+    /**
+     * @Gedmo\Blameable(on="update")
+     * @ORM\Column(type="string")
+     */
+    private $updatedBy;
 
     /**
      * @ORM\OneToMany(
@@ -145,7 +157,7 @@ class Category
         return $this->description;
     }
 
-	public function setParent($parent)
+    public function setParent($parent)
     {
         $this->parent = $parent;
     }
@@ -172,10 +184,10 @@ class Category
 
     public function getLeft()
     {
-    	return $this->lft;
+        return $this->lft;
     }
 
-	public function getRight()
+    public function getRight()
     {
         return $this->rgt;
     }
@@ -188,6 +200,16 @@ class Category
     public function getUpdated()
     {
         return $this->updated;
+    }
+
+    public function getCreatedBy()
+    {
+        return $this->createdBy;
+    }
+
+    public function getUpdatedBy()
+    {
+        return $this->updatedBy;
     }
 
     public function __toString()

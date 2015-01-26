@@ -4,14 +4,12 @@ namespace Gedmo\Sluggable;
 
 use Doctrine\Common\EventManager;
 use Tool\BaseTestCaseORM;
-use Doctrine\Common\Util\Debug,
-    Sluggable\Fixture\Article;
+use Sluggable\Fixture\Article;
 
 /**
  * These are tests for sluggable behavior
  *
  * @author Gediminas Morkevicius <gediminas.morkevicius@gmail.com>
- * @package Gedmo.Tests
  * @link http://www.gediminasm.org
  * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
@@ -23,8 +21,8 @@ class TransliterationTest extends BaseTestCaseORM
     {
         parent::setUp();
 
-        $evm = new EventManager;
-        $evm->addEventSubscriber(new SluggableListener);
+        $evm = new EventManager();
+        $evm->addEventSubscriber(new SluggableListener());
 
         $this->getMockSqliteEntityManager($evm);
         $this->populate();
@@ -49,19 +47,19 @@ class TransliterationTest extends BaseTestCaseORM
 
     private function populate()
     {
-        $lithuanian = new Article;
+        $lithuanian = new Article();
         $lithuanian->setTitle('trąnslįteration tėst ųsąge ūž');
         $lithuanian->setCode('lt');
 
-        $bulgarian = new Article;
+        $bulgarian = new Article();
         $bulgarian->setTitle('това е тестово заглавие');
         $bulgarian->setCode('bg');
 
-        $russian = new Article;
+        $russian = new Article();
         $russian->setTitle('это тестовый заголовок');
         $russian->setCode('ru');
 
-        $german = new Article;
+        $german = new Article();
         $german->setTitle('führen Aktivitäten Haglöfs');
         $german->setCode('de');
 
@@ -76,7 +74,7 @@ class TransliterationTest extends BaseTestCaseORM
     protected function getUsedEntityFixtures()
     {
         return array(
-            self::ARTICLE
+            self::ARTICLE,
         );
     }
 }

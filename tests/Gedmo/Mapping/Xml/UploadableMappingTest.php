@@ -16,7 +16,6 @@ use Tool\BaseTestCaseOM;
  *
  * @author Gustavo Falco <comfortablynumb84@gmail.com>
  * @author Gediminas Morkevicius <gediminas.morkevicius@gmail.com>
- * @package Gedmo.Mapping
  * @link http://www.gediminasm.org
  * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
@@ -37,22 +36,22 @@ class UploadableMappingTest extends BaseTestCaseOM
         parent::setUp();
 
         Validator::$enableMimeTypesConfigException = false;
-        
+
         $reader = new AnnotationReader();
         $annotationDriver = new AnnotationDriver($reader);
 
         $xmlDriver = new XmlDriver(__DIR__.'/../Driver/Xml');
 
-        $chain = new DriverChain;
+        $chain = new DriverChain();
         $chain->addDriver($xmlDriver, 'Mapping\Fixture\Xml');
         $chain->addDriver($annotationDriver, 'Mapping\Fixture');
 
-        $this->listener = new UploadableListener;
-        $this->evm = new EventManager;
+        $this->listener = new UploadableListener();
+        $this->evm = new EventManager();
         $this->evm->addEventSubscriber($this->listener);
 
         $this->em = $this->getMockSqliteEntityManager(array(
-            'Mapping\Fixture\Xml\Uploadable'
+            'Mapping\Fixture\Xml\Uploadable',
         ), $chain);
     }
 

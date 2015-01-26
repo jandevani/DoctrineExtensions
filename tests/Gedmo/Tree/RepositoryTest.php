@@ -4,15 +4,13 @@ namespace Gedmo\Tree;
 
 use Doctrine\Common\EventManager;
 use Tool\BaseTestCaseORM;
-use Doctrine\Common\Util\Debug,
-    Tree\Fixture\Category,
-    Tree\Fixture\CategoryUuid;
+use Tree\Fixture\Category;
+use Tree\Fixture\CategoryUuid;
 
 /**
  * These are tests for Tree behavior
  *
  * @author Gediminas Morkevicius <gediminas.morkevicius@gmail.com>
- * @package Gedmo.Tree
  * @link http://www.gediminasm.org
  * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
@@ -25,8 +23,8 @@ class RepositoryTest extends BaseTestCaseORM
     {
         parent::setUp();
 
-        $evm = new EventManager;
-        $evm->addEventSubscriber(new TreeListener);
+        $evm = new EventManager();
+        $evm->addEventSubscriber(new TreeListener());
 
         $this->getMockSqliteEntityManager($evm);
         $this->populate();
@@ -275,7 +273,7 @@ class RepositoryTest extends BaseTestCaseORM
 
         // now lets brake something
 
-        $dql = 'UPDATE ' . self::CATEGORY . ' node';
+        $dql = 'UPDATE '.self::CATEGORY.' node';
         $dql .= ' SET node.lft = 1';
         $dql .= ' WHERE node.id = 8';
         $q = $this->em->createQuery($dql);
@@ -301,11 +299,10 @@ class RepositoryTest extends BaseTestCaseORM
         $this->assertEquals('node [8] left is less than parent`s [4] left value', $invalidLeft);
 
         // test recover functionality
-        // @todo implement
-        //$repo->recover();
-        //$this->em->clear(); // must clear cached entities
+        $repo->recover();
+        $this->em->flush();
 
-        //$this->assertTrue($repo->verify());
+        $this->assertTrue($repo->verify());
     }
 
     public function testMoveRootNode()

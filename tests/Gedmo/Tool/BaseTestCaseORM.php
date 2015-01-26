@@ -3,7 +3,6 @@
 namespace Tool;
 
 use Gedmo\Tool\Logging\DBAL\QueryAnalyzer;
-use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
 use Doctrine\ORM\EntityManager;
 use Doctrine\Common\EventManager;
@@ -17,6 +16,7 @@ use Gedmo\Loggable\LoggableListener;
 use Gedmo\SoftDeleteable\SoftDeleteableListener;
 use Doctrine\ORM\Mapping\DefaultQuoteStrategy;
 use Doctrine\ORM\Mapping\DefaultNamingStrategy;
+use Doctrine\ORM\Repository\DefaultRepositoryFactory;
 
 /**
  * Base test case contains common mock objects
@@ -24,8 +24,6 @@ use Doctrine\ORM\Mapping\DefaultNamingStrategy;
  * ORM object manager
  *
  * @author Gediminas Morkevicius <gediminas.morkevicius@gmail.com>
- * @package Gedmo
- * @subpackage BaseTestCase
  * @link http://www.gediminasm.org
  * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
@@ -46,7 +44,6 @@ abstract class BaseTestCaseORM extends \PHPUnit_Framework_TestCase
      */
     protected function setUp()
     {
-
     }
 
     /**
@@ -55,6 +52,7 @@ abstract class BaseTestCaseORM extends \PHPUnit_Framework_TestCase
      * database in memory
      *
      * @param EventManager $evm
+     *
      * @return EntityManager
      */
     protected function getMockSqliteEntityManager(EventManager $evm = null, Configuration $config = null)
@@ -67,9 +65,9 @@ abstract class BaseTestCaseORM extends \PHPUnit_Framework_TestCase
         $config = null === $config ? $this->getMockAnnotatedConfig() : $config;
         $em = EntityManager::create($conn, $config, $evm ?: $this->getEventManager());
 
-        $schema = array_map(function($class) use ($em) {
+        $schema = array_map(function ($class) use ($em) {
             return $em->getClassMetadata($class);
-        }, (array)$this->getUsedEntityFixtures());
+        }, (array) $this->getUsedEntityFixtures());
 
         $schemaTool = new SchemaTool($em);
         $schemaTool->dropSchema(array());
@@ -83,8 +81,9 @@ abstract class BaseTestCaseORM extends \PHPUnit_Framework_TestCase
      * annotation mapping driver and custom
      * connection
      *
-     * @param array $conn
+     * @param array        $conn
      * @param EventManager $evm
+     *
      * @return EntityManager
      */
     protected function getMockCustomEntityManager(array $conn, EventManager $evm = null)
@@ -92,9 +91,9 @@ abstract class BaseTestCaseORM extends \PHPUnit_Framework_TestCase
         $config = $this->getMockAnnotatedConfig();
         $em = EntityManager::create($conn, $config, $evm ?: $this->getEventManager());
 
-        $schema = array_map(function($class) use ($em) {
+        $schema = array_map(function ($class) use ($em) {
             return $em->getClassMetadata($class);
-        }, (array)$this->getUsedEntityFixtures());
+        }, (array) $this->getUsedEntityFixtures());
 
         $schemaTool = new SchemaTool($em);
         $schemaTool->dropSchema(array());
@@ -108,6 +107,7 @@ abstract class BaseTestCaseORM extends \PHPUnit_Framework_TestCase
      * annotation mapping driver
      *
      * @param EventManager $evm
+     *
      * @return EntityManager
      */
     protected function getMockMappedEntityManager(EventManager $evm = null)
@@ -152,6 +152,7 @@ abstract class BaseTestCaseORM extends \PHPUnit_Framework_TestCase
      *
      * @param boolean $dumpOnlySql
      * @param boolean $writeToLog
+     *
      * @throws \RuntimeException
      */
     protected function stopQueryLog($dumpOnlySql = false, $writeToLog = false)
@@ -196,20 +197,21 @@ abstract class BaseTestCaseORM extends \PHPUnit_Framework_TestCase
      */
     private function getEventManager()
     {
-        $evm = new EventManager;
-        $evm->addEventSubscriber(new TreeListener);
-        $evm->addEventSubscriber(new SluggableListener);
-        $evm->addEventSubscriber(new LoggableListener);
-        $evm->addEventSubscriber(new TranslatableListener);
-        $evm->addEventSubscriber(new TimestampableListener);
-        $evm->addEventSubscriber(new SoftDeleteableListener);
+        $evm = new EventManager();
+        $evm->addEventSubscriber(new TreeListener());
+        $evm->addEventSubscriber(new SluggableListener());
+        $evm->addEventSubscriber(new LoggableListener());
+        $evm->addEventSubscriber(new TranslatableListener());
+        $evm->addEventSubscriber(new TimestampableListener());
+        $evm->addEventSubscriber(new SoftDeleteableListener());
+
         return $evm;
     }
 
     /**
      * Get annotation mapping configuration
      *
-     * @return Doctrine\ORM\Configuration
+     * @return \Doctrine\ORM\Configuration
      */
     protected function getMockAnnotatedConfig()
     {
@@ -277,6 +279,12 @@ abstract class BaseTestCaseORM extends \PHPUnit_Framework_TestCase
             ->expects($this->any())
             ->method('getNamingStrategy')
             ->will($this->returnValue(new DefaultNamingStrategy()))
+        ;
+
+        $config
+            ->expects($this->once())
+            ->method('getRepositoryFactory')
+            ->will($this->returnValue(new DefaultRepositoryFactory()))
         ;
 
         return $config;

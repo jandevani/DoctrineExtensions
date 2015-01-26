@@ -8,7 +8,6 @@ use Doctrine\Common\Collections\Collection;
  * Proxy class for Entity/Document translations.
  *
  * @author  Konstantin Kudryashov <ever.zet@gmail.com>
- * @link    http://www.gediminasm.org
  * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
 class TranslationProxy
@@ -17,16 +16,21 @@ class TranslationProxy
     protected $translatable;
     protected $properties = array();
     protected $class;
+    /**
+     * @var Collection|TranslationInterface[]
+     */
     protected $coll;
 
     /**
      * Initializes translations collection
      *
-     * @param   Object      $translatable   object to translate
-     * @param   string      $locale         translation name
-     * @param   array       $properties     object properties to translate
-     * @param   string      $class          translation entity|document class
-     * @param   Collection  $coll           translations collection
+     * @param object     $translatable object to translate
+     * @param string     $locale       translation name
+     * @param array      $properties   object properties to translate
+     * @param string     $class        translation entity|document class
+     * @param Collection $coll         translations collection
+     *
+     * @throws \InvalidArgumentException Translation class doesn't implement TranslationInterface
      */
     public function __construct($translatable, $locale, array $properties, $class, Collection $coll)
     {
@@ -58,6 +62,7 @@ class TranslationProxy
                     case 'set':
                         if (isset($arguments[0])) {
                             $this->setTranslatedValue($property, $arguments[0]);
+
                             return $this;
                         }
                 }
@@ -98,7 +103,7 @@ class TranslationProxy
 
         $this->translatable->$property = $value;
     }
-    
+
     public function __isset($property)
     {
         return in_array($property, $this->properties);
@@ -107,7 +112,7 @@ class TranslationProxy
     /**
      * Returns locale name for the current translation proxy instance.
      *
-     * @return  string
+     * @return string
      */
     public function getProxyLocale()
     {
@@ -117,9 +122,9 @@ class TranslationProxy
     /**
      * Returns translated value for specific property.
      *
-     * @param   string  $property   property name
+     * @param string $property property name
      *
-     * @return  mixed
+     * @return mixed
      */
     public function getTranslatedValue($property)
     {
@@ -131,8 +136,8 @@ class TranslationProxy
     /**
      * Sets translated value for specific property.
      *
-     * @param   string  $property   property name
-     * @param   string  $value      value
+     * @param string $property property name
+     * @param string $value    value
      */
     public function setTranslatedValue($property, $value)
     {
@@ -144,10 +149,10 @@ class TranslationProxy
     /**
      * Finds existing or creates new translation for specified property
      *
-     * @param   string  $property   object property name
-     * @param   string  $locale     locale name
+     * @param string $property object property name
+     * @param string $locale   locale name
      *
-     * @return  Translation
+     * @return Translation
      */
     private function findOrCreateTranslationForProperty($property, $locale)
     {
@@ -157,6 +162,7 @@ class TranslationProxy
             }
         }
 
+        /** @var TranslationInterface $translation */
         $translation = new $this->class;
         $translation->setTranslatable($this->translatable);
         $translation->setProperty($property);

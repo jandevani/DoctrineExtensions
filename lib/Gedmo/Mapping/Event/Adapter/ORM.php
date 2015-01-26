@@ -6,15 +6,13 @@ use Gedmo\Mapping\Event\AdapterInterface;
 use Gedmo\Exception\RuntimeException;
 use Doctrine\Common\EventArgs;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Event\LifecycleEventArgs;
 
 /**
  * Doctrine event adapter for ORM specific
  * event arguments
  *
  * @author Gediminas Morkevicius <gediminas.morkevicius@gmail.com>
- * @package Gedmo.Mapping.Event.Adapter
- * @subpackage ORM
- * @link http://www.gediminasm.org
  * @license MIT License (http://www.opensource.org/licenses/mit-license.php)
  */
 class ORM implements AdapterInterface
@@ -56,12 +54,21 @@ class ORM implements AdapterInterface
     /**
      * {@inheritdoc}
      */
+    public function getRootObjectClass($meta)
+    {
+        return $meta->rootEntityName;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function __call($method, $args)
     {
         if (is_null($this->args)) {
             throw new RuntimeException("Event args must be set before calling its methods");
         }
         $method = str_replace('Object', $this->getDomainObjectName(), $method);
+
         return call_user_func_array(array($this->args, $method), $args);
     }
 
@@ -83,7 +90,16 @@ class ORM implements AdapterInterface
         if (!is_null($this->em)) {
             return $this->em;
         }
+
         return $this->__call('getEntityManager', array());
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getObjectState($uow, $object)
+    {
+        return $uow->getEntityState($object);
     }
 
     /**
@@ -148,5 +164,18 @@ class ORM implements AdapterInterface
     public function clearObjectChangeSet($uow, $oid)
     {
         $uow->clearEntityChangeSet($oid);
+    }
+
+    /**
+     * Creates a ORM specific LifecycleEventArgs.
+     *
+     * @param object                                $document
+     * @param \Doctrine\ODM\MongoDB\DocumentManager $documentManager
+     *
+     * @return \Doctrine\ODM\MongoDB\Event\LifecycleEventArgs
+     */
+    public function createLifecycleEventArgsInstance($document, $documentManager)
+    {
+        return new LifecycleEventArgs($document, $documentManager);
     }
 }
