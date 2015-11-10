@@ -6,6 +6,7 @@ use Doctrine\ODM\MongoDB\Mapping\Driver\AnnotationDriver;
 use Doctrine\ODM\MongoDB\DocumentManager;
 use Doctrine\Common\EventManager;
 use Doctrine\MongoDB\Connection;
+use Doctrine\ODM\MongoDB\Repository\DefaultRepositoryFactory;
 use Gedmo\Translatable\TranslatableListener;
 use Gedmo\Sluggable\SluggableListener;
 use Gedmo\Timestampable\TimestampableListener;
@@ -137,6 +138,10 @@ abstract class BaseTestCaseMongoODM extends \PHPUnit_Framework_TestCase
             ->method('getFilterClassName')
             ->will($this->returnValue('Gedmo\\SoftDeleteable\\Filter\\ODM\\SoftDeleteableFilter'));
 
+        $config->expects($this->any())
+            ->method('getFilterParameters')
+            ->will($this->returnValue(array()));
+
         $config->expects($this->once())
             ->method('getProxyDir')
             ->will($this->returnValue(__DIR__.'/../../temp'));
@@ -186,6 +191,15 @@ abstract class BaseTestCaseMongoODM extends \PHPUnit_Framework_TestCase
         $config->expects($this->any())
             ->method('getMetadataDriverImpl')
             ->will($this->returnValue($mappingDriver));
+
+        $config->expects($this->any())
+            ->method('getRepositoryFactory')
+            ->will($this->returnValue(new DefaultRepositoryFactory()));
+
+        $config->expects($this->any())
+            ->method('getDefaultRepositoryClassName')
+            ->will($this->returnValue('Doctrine\\ODM\\MongoDB\\DocumentRepository'));
+
 
         return $config;
     }

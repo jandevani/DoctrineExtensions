@@ -2,6 +2,7 @@
 
 namespace Gedmo\Loggable\Document\Repository;
 
+use Gedmo\Loggable\Document\LogEntry;
 use Gedmo\Tool\Wrapper\MongoDocumentWrapper;
 use Gedmo\Loggable\LoggableListener;
 use Doctrine\ODM\MongoDB\DocumentRepository;
@@ -29,7 +30,7 @@ class LogEntryRepository extends DocumentRepository
      *
      * @param object $document
      *
-     * @return array
+     * @return LogEntry[]
      */
     public function getLogEntries($document)
     {
@@ -46,7 +47,6 @@ class LogEntryRepository extends DocumentRepository
         if ($result instanceof Cursor) {
             $result = $result->toArray();
         }
-
         return $result;
     }
 
@@ -56,7 +56,7 @@ class LogEntryRepository extends DocumentRepository
      * After this operation you will need to
      * persist and flush the $document.
      *
-     * @param object  $document
+     * @param object $document
      * @param integer $version
      *
      * @throws \Gedmo\Exception\UnexpectedValueException
@@ -72,7 +72,7 @@ class LogEntryRepository extends DocumentRepository
         $qb = $this->createQueryBuilder();
         $qb->field('objectId')->equals($objectId);
         $qb->field('objectClass')->equals($objectMeta->name);
-        $qb->field('version')->lte($version);
+        $qb->field('version')->lte(intval($version));
         $qb->sort('version', 'ASC');
         $q = $qb->getQuery();
 
@@ -81,30 +81,53 @@ class LogEntryRepository extends DocumentRepository
             $logs = $logs->toArray();
         }
         if ($logs) {
-            $config = $this->getLoggableListener()->getConfiguration($this->dm, $objectMeta->name);
-            $fields = $config['versioned'];
-            $filled = false;
-            while (($log = array_pop($logs)) && !$filled) {
-                if ($data = $log->getData()) {
-                    foreach ($data as $field => $value) {
-                        if (in_array($field, $fields)) {
-                            if ($objectMeta->isSingleValuedAssociation($field)) {
-                                $mapping = $objectMeta->getFieldMapping($field);
-                                $value = $value ? $this->dm->getReference($mapping['targetDocument'], $value) : null;
-                            }
-                            $wrapped->setPropertyValue($field, $value);
-                            unset($fields[array_search($field, $fields)]);
-                        }
-                    }
-                }
-                $filled = count($fields) === 0;
+            $data = array();
+            while (($log = array_shift($logs))) {
+                $data = array_merge($data, $log->getData());
             }
-            /*if (count($fields)) {
-                throw new \Gedmo\Exception\UnexpectedValueException('Could not fully revert the document to version: '.$version);
-            }*/
+            $this->fillDocument($document, $data, $objectMeta);
         } else {
-            throw new \Gedmo\Exception\UnexpectedValueException('Could not find any log entries under version: '.$version);
+            throw new \Gedmo\Exception\UnexpectedValueException('Count not find any log entries under version: '.$version);
         }
+    }
+
+    /**
+     * Fills a documents versioned fields with data
+     *
+     * @param object $document
+     * @param array $data
+     */
+    protected function fillDocument($document, array $data)
+    {
+        $wrapped = new MongoDocumentWrapper($document, $this->dm);
+        $objectMeta = $wrapped->getMetadata();
+        $config = $this->getLoggableListener()->getConfiguration($this->dm, $objectMeta->name);
+        $fields = $config['versioned'];
+        foreach ($data as $field => $value) {
+            if (!in_array($field, $fields)) {
+                continue;
+            }
+            $mapping = $objectMeta->getFieldMapping($field);
+            // Fill the embedded document
+            if ($wrapped->isEmbeddedAssociation($field)) {
+                if (!empty($value)) {
+                    $embeddedMetadata = $this->dm->getClassMetadata($mapping['targetDocument']);
+                    $document = $embeddedMetadata->newInstance();
+                    $this->fillDocument($document, $value);
+                    $value = $document;
+                }
+            } elseif ($objectMeta->isSingleValuedAssociation($field)) {
+                $value = $value ? $this->dm->getReference($mapping['targetDocument'], $value) : null;
+            }
+            $wrapped->setPropertyValue($field, $value);
+            unset($fields[$field]);
+        }
+
+        /*
+        if (count($fields)) {
+            throw new \Gedmo\Exception\UnexpectedValueException('Cound not fully revert the document to version: '.$version);
+        }
+        */
     }
 
     /**
@@ -133,7 +156,6 @@ class LogEntryRepository extends DocumentRepository
                 throw new \Gedmo\Exception\RuntimeException('The loggable listener could not be found');
             }
         }
-
         return $this->listener;
     }
 }

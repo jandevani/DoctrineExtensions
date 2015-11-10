@@ -2,7 +2,9 @@
 
 namespace Gedmo\Loggable\Entity\Repository;
 
+use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Query;
+use Gedmo\Loggable\Entity\LogEntry;
 use Gedmo\Tool\Wrapper\EntityWrapper;
 use Doctrine\ORM\EntityRepository;
 use Gedmo\Loggable\LoggableListener;
@@ -28,7 +30,7 @@ class LogEntryRepository extends EntityRepository
      *
      * @param object $entity
      *
-     * @return array
+     * @return LogEntry[]
      */
     public function getLogEntries($entity)
     {
@@ -99,10 +101,7 @@ class LogEntryRepository extends EntityRepository
                 if ($data = $log->getData()) {
                     foreach ($data as $field => $value) {
                         if (in_array($field, $fields)) {
-                            if ($objectMeta->isSingleValuedAssociation($field)) {
-                                $mapping = $objectMeta->getAssociationMapping($field);
-                                $value = $value ? $this->_em->getReference($mapping['targetEntity'], $value) : null;
-                            }
+                            $this->mapValue($objectMeta, $field, $value);
                             $wrapped->setPropertyValue($field, $value);
                             unset($fields[array_search($field, $fields)]);
                         }
@@ -116,6 +115,21 @@ class LogEntryRepository extends EntityRepository
         } else {
             throw new \Gedmo\Exception\UnexpectedValueException('Could not find any log entries under version: '.$version);
         }
+    }
+
+    /**
+     * @param ClassMetadata $objectMeta
+     * @param string        $field
+     * @param mixed         $value
+     */
+    protected function mapValue(ClassMetadata $objectMeta, $field, &$value)
+    {
+        if (!$objectMeta->isSingleValuedAssociation($field)) {
+            return;
+        }
+        
+        $mapping = $objectMeta->getAssociationMapping($field);
+        $value   = $value ? $this->_em->getReference($mapping['targetEntity'], $value) : null;
     }
 
     /**

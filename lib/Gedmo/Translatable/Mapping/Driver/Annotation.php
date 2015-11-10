@@ -46,10 +46,10 @@ class Annotation extends AbstractAnnotationDriver
         $class = $this->getMetaReflectionClass($meta);
         // class annotations
         if ($annot = $this->reader->getClassAnnotation($class, self::ENTITY_CLASS)) {
-            if (!class_exists($annot->class)) {
+            if (!$cl = $this->getRelatedClassName($meta, $annot->class)) {
                 throw new InvalidMappingException("Translation class: {$annot->class} does not exist.");
             }
-            $config['translationClass'] = $annot->class;
+            $config['translationClass'] = $cl;
         }
 
         // property annotations
@@ -85,6 +85,23 @@ class Annotation extends AbstractAnnotationDriver
                     throw new InvalidMappingException("Language field [{$field}] should not be mapped as column property in entity - {$meta->name}, since it makes no sense");
                 }
                 $config['locale'] = $field;
+            }
+        }
+
+        // Embedded entity
+        if (property_exists($meta, 'embeddedClasses') && $meta->embeddedClasses) {
+            foreach ($meta->embeddedClasses as $propertyName => $embeddedClassInfo) {
+                $embeddedClass = new \ReflectionClass($embeddedClassInfo['class']);
+                foreach ($embeddedClass->getProperties() as $embeddedProperty) {
+                    if ($translatable = $this->reader->getPropertyAnnotation($embeddedProperty, self::TRANSLATABLE)) {
+                        $field = $propertyName . '.' . $embeddedProperty->getName();
+
+                        $config['fields'][] = $field;
+                        if (isset($translatable->fallback)) {
+                            $config['fallback'][$field] = $translatable->fallback;
+                        }
+                    }
+                }
             }
         }
 

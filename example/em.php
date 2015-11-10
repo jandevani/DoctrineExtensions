@@ -9,7 +9,7 @@ $connection = array(
     'host' => '127.0.0.1',
     'port' => 3306,
     'user' => 'root',
-    'password' => 'nimda',
+    'password' => null,
     'dbname' => 'test',
     'driver' => 'pdo_mysql',
 );
@@ -55,7 +55,7 @@ $annotationDriver = new Doctrine\ORM\Mapping\Driver\AnnotationDriver(
     array(__DIR__.'/app/Entity') // paths to look in
 );
 // NOTE: driver for application Entity can be different, Yaml, Xml or whatever
-// register annotation driver for our application Entity namespace
+// register annotation driver for our application Entity fully qualified namespace
 $driverChain->addDriver($annotationDriver, 'Entity');
 
 // general ORM configuration
