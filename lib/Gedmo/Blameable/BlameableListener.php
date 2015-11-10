@@ -69,29 +69,4 @@ class BlameableListener extends AbstractTrackingListener
     {
         return __NAMESPACE__;
     }
-
-    /**
-     * Updates a field
-     *
-     * @param object           $object
-     * @param BlameableAdapter $ea
-     * @param $meta
-     * @param $field
-     */
-    protected function updateField($object, $ea, $meta, $field)
-    {
-        $property = $meta->getReflectionProperty($field);
-        $oldValue = $property->getValue($object);
-        $newValue = $this->getUserValue($meta, $field);
-
-        //if blame is reference, persist object
-        if (is_object($newValue) && $meta->hasAssociation($field)) {
-            $ea->getObjectManager()->persist($newValue);
-        }
-        $property->setValue($object, $newValue);
-        if ($object instanceof NotifyPropertyChanged) {
-            $uow = $ea->getObjectManager()->getUnitOfWork();
-            $uow->propertyChanged($object, $field, $oldValue, $newValue);
-        }
-    }
 }
